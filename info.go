@@ -24,6 +24,6 @@ func HasSSSE3() bool {
 	return bool(C.has_ssse3())
 }
 
-func HasNeon() bool {
-	return bool(C.has_neon())
+func HasFMA3() bool {
+	return bool(C.has_fma3())
 }
