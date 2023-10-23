@@ -94,7 +94,7 @@ func (t *Float32) cMatMul(t2 *Float32, size []int64, head, m, n, d int64) gomath
 	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
 	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
 	parallel(head, core, func(_, offset, size int64) {
-		for block := int64(0); block < head; block++ {
+		for block := offset; block < offset+size; block++ {
 			offset1 := block * m * d
 			offset2 := block * n * d
 			idx := block * m * n

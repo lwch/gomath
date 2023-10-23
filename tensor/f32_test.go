@@ -17,6 +17,7 @@ func f32MatMul(rows, cols int64) gomath.Tensor {
 }
 
 func TestF32MatMul(t *testing.T) {
+	debug = false
 	ts := f32MatMul(2, 3)
 	result := ts.(*Float32).data
 	if result[0] != 14 || result[1] != 32 || result[2] != 32 || result[3] != 77 {
@@ -25,6 +26,7 @@ func TestF32MatMul(t *testing.T) {
 }
 
 func BenchmarkF32MatMul(b *testing.B) {
+	debug = false
 	for i := 0; i < b.N; i++ {
 		f32MatMul(64, 4096)
 	}
