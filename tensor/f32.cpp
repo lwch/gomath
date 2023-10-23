@@ -1,8 +1,16 @@
 #include "f32.h"
 #include "../info.h"
 #include "exception.hpp"
-#include <immintrin.h>
 #include <stdio.h>
+
+#if defined(__APPLE__) && defined(__arm64__)
+
+void f32_init() {}
+float f32_dot_vector(float *, float *, int64_t) { return 0; }
+
+#else
+
+#include <immintrin.h>
 
 typedef float (*fn_f32_dot_vector)(float *, float *, int64_t);
 fn_f32_dot_vector f_f32_dot_vector = nullptr;
@@ -74,3 +82,5 @@ float f32_dot_vector_avx512(float *x, float *w, int64_t d) {
   }
   return y;
 }
+
+#endif

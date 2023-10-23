@@ -3,6 +3,13 @@
 // code from
 // https://stackoverflow.com/questions/6121792/how-to-check-if-a-cpu-supports-the-sse3-instruction-set
 
+#if defined(__APPLE__) && defined(__arm64__)
+
+bool has_avx() { return false; }
+bool has_avx512() { return false; }
+
+#else
+
 #ifdef _WIN32
 
 #include <intrin.h>
@@ -14,8 +21,8 @@
 
 //  GCC Intrinsics
 #include <cpuid.h>
-void cpuid(int info[4], int InfoType) {
-  __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
+void cpuid(int info[4], int type) {
+  __cpuid_count(type, 0, info[0], info[1], info[2], info[3]);
 }
 
 #endif
@@ -50,3 +57,5 @@ bool has_avx512() {
   }
   return false;
 }
+
+#endif
