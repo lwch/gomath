@@ -1,22 +1,25 @@
 package tensor
 
 import (
+	"sync"
+
 	"github.com/lwch/gomath"
 )
 
+var debug bool
+
 func computeInC() bool {
+	if debug {
+		return false
+	}
 	switch {
 	case gomath.HasAVX512():
-		return true
-	case gomath.HasAVX2():
 		return true
 	case gomath.HasAVX():
 		return true
 	// case gomath.HasSSE3():
 	// 	return true
 	// case gomath.HasSSSE3():
-	// 	return true
-	// case gomath.HasFMA3():
 	// 	return true
 	default:
 		return false
@@ -49,4 +52,29 @@ func sizeMatch(a, b []int64) bool {
 		}
 	}
 	return true
+}
+
+func parallel(size, batches int64, fn func(batch, offset, size int64)) {
+	step := size / batches
+	var wg sync.WaitGroup
+	wg.Add(int(batches))
+	for i := int64(0); i < batches; i++ {
+		offset := i * step
+		if i == batches-1 {
+			step = size - offset
+		}
+		go func(i, offset, step int64) {
+			defer wg.Done()
+			fn(i, offset, step)
+		}(i, offset, step)
+	}
+	wg.Wait()
+}
+
+func dotVector[T float32](x, w []T, d int64) T {
+	var ret T
+	for i := int64(0); i < d; i++ {
+		ret += x[i] * w[i]
+	}
+	return ret
 }

@@ -39,18 +39,6 @@ bool has_avx() {
   return false;
 }
 
-bool has_avx2() {
-  int info[4];
-  int n_ids;
-  int n_ext_ids;
-  cpu_info(info, &n_ids, &n_ext_ids);
-  if (n_ids >= 0x00000007) {
-    cpuid(info, 0x00000007);
-    return (info[1] & ((int)1 << 5)) != 0;
-  }
-  return false;
-}
-
 bool has_avx512() {
   int info[4];
   int n_ids;
@@ -59,42 +47,6 @@ bool has_avx512() {
   if (n_ids >= 0x00000007) {
     cpuid(info, 0x00000007);
     return (info[1] & ((int)1 << 16)) != 0;
-  }
-  return false;
-}
-
-bool has_sse3() {
-  int info[4];
-  int n_ids;
-  int n_ext_ids;
-  cpu_info(info, &n_ids, &n_ext_ids);
-  if (n_ids >= 0x00000001) {
-    cpuid(info, 0x00000001);
-    return (info[2] & ((int)1 << 0)) != 0;
-  }
-  return false;
-}
-
-bool has_ssse3() {
-  int info[4];
-  int n_ids;
-  int n_ext_ids;
-  cpu_info(info, &n_ids, &n_ext_ids);
-  if (n_ids >= 0x00000001) {
-    cpuid(info, 0x00000001);
-    return (info[2] & ((int)1 << 9)) != 0;
-  }
-  return false;
-}
-
-bool has_fma3() {
-  int info[4];
-  int n_ids;
-  int n_ext_ids;
-  cpu_info(info, &n_ids, &n_ext_ids);
-  if (n_ids >= 0x00000001) {
-    cpuid(info, 0x00000001);
-    return (info[2] & ((int)1 << 12)) != 0;
   }
   return false;
 }

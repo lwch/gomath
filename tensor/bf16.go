@@ -84,8 +84,8 @@ func (t *BFloat16) matMulBFloat16(t2 *BFloat16) gomath.Tensor {
 	targetSize := head * m * n
 	data := make([]uint16, targetSize)
 	if computeInC() {
-		p1 := unsafe.Pointer(unsafe.SliceData(t.data))
-		p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
+		data1 := make([]float32, d1)
+		data2 := make([]float32, d2)
 		for block := int64(0); block < head; block++ {
 			offset1 := block * m * d1
 			offset2 := block * n * d2
@@ -94,10 +94,11 @@ func (t *BFloat16) matMulBFloat16(t2 *BFloat16) gomath.Tensor {
 				offset2 = offset2 + rows*d2
 				for cols := int64(0); cols < n; cols++ {
 					idx := block*m*n + rows*n + cols
-					data[idx] = uint16(C.bf16_dot_vector(
-						(*C.uint16_t)(unsafe.Add(p1, uintptr(offset1))),
-						(*C.uint16_t)(unsafe.Add(p2, uintptr(offset2))),
-						C.int64_t(d1)))
+					dx := C.bf16_dot_vector(
+						(*C.float)(unsafe.SliceData(data1)),
+						(*C.float)(unsafe.SliceData(data2)),
+						C.int64_t(d1))
+					data[idx] = float32ToBF16(float32(dx))
 				}
 			}
 		}

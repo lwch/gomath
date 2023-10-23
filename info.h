@@ -6,11 +6,7 @@ extern "C" {
 #endif
 
 bool has_avx();
-bool has_avx2();
 bool has_avx512();
-bool has_sse3();
-bool has_ssse3();
-bool has_fma3();
 
 #ifdef __cplusplus
 }
