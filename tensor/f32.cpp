@@ -13,20 +13,20 @@ float f32_dot_vector(float *, float *, int64_t) { return 0; }
 #include <immintrin.h>
 
 typedef float (*fn_f32_dot_vector)(float *, float *, int64_t);
-fn_f32_dot_vector f_f32_dot_vector = nullptr;
+fn_f32_dot_vector f32_dot_vector_impl = nullptr;
 
 void f32_init() {
   if (has_avx512()) {
     extern float f32_dot_vector_avx512(float *, float *, int64_t);
-    f_f32_dot_vector = f32_dot_vector_avx512;
+    f32_dot_vector_impl = f32_dot_vector_avx512;
   } else if (has_avx()) {
     extern float f32_dot_vector_avx(float *, float *, int64_t);
-    f_f32_dot_vector = f32_dot_vector_avx;
+    f32_dot_vector_impl = f32_dot_vector_avx;
   }
 }
 
 float f32_dot_vector(float *x, float *w, int64_t d) {
-  return f_f32_dot_vector(x, w, d);
+  return f32_dot_vector_impl(x, w, d);
 }
 
 float f32_dot_vector_avx(float *x, float *w, int64_t d) {

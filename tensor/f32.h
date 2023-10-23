@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
+void f32_init();
 float f32_dot_vector(float *x, float *w, int64_t d);
 
 #ifdef __cplusplus

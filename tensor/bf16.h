@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
+void bf16_init();
 float bf16_dot_vector(float *x, float *w, int64_t d);
 
 #ifdef __cplusplus

@@ -1,13 +1,12 @@
 package tensor
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/lwch/gomath"
 )
 
-func matMul(rows, cols int64) gomath.Tensor {
+func f32MatMul(rows, cols int64) gomath.Tensor {
 	data := make([]float32, rows*cols)
 	for i := range data {
 		data[i] = float32(i) + 1
@@ -18,25 +17,31 @@ func matMul(rows, cols int64) gomath.Tensor {
 }
 
 func TestF32MatMul(t *testing.T) {
-	ts := matMul(2, 3)
-	fmt.Println(ts.Storage())
+	ts := f32MatMul(2, 3)
+	result := ts.(*Float32).data
+	if result[0] != 14 || result[1] != 32 || result[2] != 32 || result[3] != 77 {
+		t.Fatal(result)
+	}
 }
 
-func BenchmarkMatMul(b *testing.B) {
+func BenchmarkF32MatMul(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		matMul(64, 4096)
+		f32MatMul(64, 4096)
 	}
 }
 
 func TestF32MatMulGO(t *testing.T) {
 	debug = true
-	ts := matMul(2, 3)
-	fmt.Println(ts.Storage())
+	ts := f32MatMul(2, 3)
+	result := ts.(*Float32).data
+	if result[0] != 14 || result[1] != 32 || result[2] != 32 || result[3] != 77 {
+		t.Fatal(result)
+	}
 }
 
-func BenchmarkMatMulGO(b *testing.B) {
+func BenchmarkF32MatMulGO(b *testing.B) {
 	debug = true
 	for i := 0; i < b.N; i++ {
-		matMul(64, 4096)
+		f32MatMul(64, 4096)
 	}
 }
