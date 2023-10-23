@@ -1,4 +1,4 @@
-package f16
+package tensor
 
 import (
 	"github.com/lwch/gomath"
@@ -13,7 +13,7 @@ type Float16 struct {
 
 var _ gomath.Tensor = &Float16{}
 
-func New(data []uint16, shape []int64, opts ...tensor.Option) *Float16 {
+func NewFloat16(data []uint16, shape []int64, opts ...tensor.Option) *Float16 {
 	args := tensor.DefaultOptions()
 	for _, opt := range opts {
 		opt(args)

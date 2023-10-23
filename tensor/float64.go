@@ -1,4 +1,4 @@
-package f64
+package tensor
 
 import (
 	"github.com/lwch/gomath"
@@ -8,12 +8,12 @@ import (
 
 type Float64 struct {
 	*tensor.Tensor
-	data []Float64
+	data []float64
 }
 
 var _ gomath.Tensor = &Float64{}
 
-func New(data []Float64, shape []int64, opts ...tensor.Option) *Float64 {
+func NewFloat64(data []float64, shape []int64, opts ...tensor.Option) *Float64 {
 	args := tensor.DefaultOptions()
 	for _, opt := range opts {
 		opt(args)

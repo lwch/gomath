@@ -30,3 +30,8 @@ func (t *Tensor) Size() []int64 {
 func (t *Tensor) Stride() []int64 {
 	return t.stride
 }
+
+func (t *Tensor) ToDevice(device consts.Device) {
+	// TODO: implement
+	t.device = device
+}
