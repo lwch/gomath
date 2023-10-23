@@ -5,6 +5,8 @@
 
 #ifdef _WIN32
 
+#include <intrin.h>
+
 //  Windows
 #define cpuid(info, x) __cpuidex(info, x, 0)
 
