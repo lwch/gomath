@@ -99,7 +99,7 @@ func (t *Float32) cMatMul(t2 *Float32, size []int64, head, m, n, d int64) gomath
 			offset2 := block * n * d
 			idx := block * m * n
 			parallel(m, int64(core), func(batch, offset, size int64) {
-				for rows := int64(0); rows < m; rows++ {
+				for rows := offset; rows < offset+size; rows++ {
 					offset1 := offset1 + rows*d
 					idx := idx + rows*n
 					for cols := int64(0); cols < n; cols++ {
