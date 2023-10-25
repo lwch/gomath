@@ -90,29 +90,24 @@ func (t *Float32) matMul(t2 *Float32) gomath.Tensor {
 
 func (t *Float32) cMatMul(t2 *Float32, size []int64, head, m, n, d int64) gomath.Tensor {
 	data := make([]float32, head*m*n)
-	core := int64(runtime.NumCPU())
 	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
 	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
-	parallel(head, core, func(_, offset, size int64) {
-		for block := offset; block < offset+size; block++ {
-			offset1 := block * m * d
-			offset2 := block * n * d
-			idx := block * m * n
-			parallel(m, core, func(_, offset, size int64) {
-				for rows := offset; rows < offset+size; rows++ {
-					offset1 := offset1 + rows*d
-					for cols := int64(0); cols < n; cols++ {
-						offset2 := offset2 + cols*d
-						data[idx] = float32(C.fp32_dot_vector(
-							(*C.float)(unsafe.Add(p1, uintptr(offset1*4))),
-							(*C.float)(unsafe.Add(p2, uintptr(offset2*4))),
-							C.int64_t(d)))
-						idx++
-					}
-				}
-			})
+	for block := int64(0); block < head; block++ {
+		offset1 := block * m * d
+		offset2 := block * n * d
+		idx := block * m * n
+		for rows := int64(0); rows < m; rows++ {
+			offset1 := offset1 + rows*d
+			for cols := int64(0); cols < n; cols++ {
+				offset2 := offset2 + cols*d
+				data[idx] = float32(C.fp32_dot_vector(
+					(*C.float)(unsafe.Add(p1, uintptr(offset1*4))),
+					(*C.float)(unsafe.Add(p2, uintptr(offset2*4))),
+					C.int64_t(d)))
+				idx++
+			}
 		}
-	})
+	}
 	return NewFloat32(data, append(size, m, n),
 		gomath.WithDevice(t.Device()))
 }

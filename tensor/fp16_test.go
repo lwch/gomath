@@ -7,21 +7,20 @@ import (
 	"github.com/lwch/gomath/internal/half"
 )
 
-func fp16MatMul(rows, cols int64) gomath.Tensor {
+func buildFP16(rows, cols int64) gomath.Tensor {
 	data := make([]float32, rows*cols)
 	for i := range data {
 		data[i] = float32(i) + 1
 	}
-	x := NewFloat16(data, []int64{rows, cols})
-	y := NewFloat16(data, []int64{rows, cols})
-	return x.MatMul(y)
+	return NewFloat16(data, []int64{rows, cols})
 }
 
 func TestFP16MatMul(t *testing.T) {
 	debug = false
-	cols, expect := buildMatMul(2)
-	ts := fp16MatMul(2, cols)
-	result := ts.(*Float16).data
+	cols := getCols()
+	expect := computeMatMul(testRows, cols)
+	x := buildFP16(testRows, cols)
+	result := x.MatMul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
@@ -31,16 +30,18 @@ func TestFP16MatMul(t *testing.T) {
 
 func BenchmarkFP16MatMul(b *testing.B) {
 	debug = false
+	x := buildFP16(64, 4096)
 	for i := 0; i < b.N; i++ {
-		fp16MatMul(64, 4096)
+		x.MatMul(x)
 	}
 }
 
 func TestFP16MatMulGo(t *testing.T) {
 	debug = true
-	cols, expect := buildMatMul(2)
-	ts := fp16MatMul(2, cols)
-	result := ts.(*Float16).data
+	cols := getCols()
+	expect := computeMatMul(testRows, cols)
+	x := buildFP16(testRows, cols)
+	result := x.MatMul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
@@ -50,26 +51,18 @@ func TestFP16MatMulGo(t *testing.T) {
 
 func BenchmarkFP16MatMulGo(b *testing.B) {
 	debug = true
+	x := buildFP16(64, 4096)
 	for i := 0; i < b.N; i++ {
-		fp16MatMul(64, 4096)
+		x.MatMul(x)
 	}
-}
-
-func fp16Mul(rows, cols int64) gomath.Tensor {
-	data := make([]float32, rows*cols)
-	for i := range data {
-		data[i] = float32(i) + 1
-	}
-	x := NewFloat16(data, []int64{rows, cols})
-	y := NewFloat16(data, []int64{rows, cols})
-	return x.Mul(y)
 }
 
 func TestFP16Mul(t *testing.T) {
 	debug = false
-	cols, expect := buildMul(4)
-	ts := fp16Mul(4, cols)
-	result := ts.(*Float16).data
+	cols := getCols()
+	expect := computeMul(testRows, cols)
+	x := buildFP16(testRows, cols)
+	result := x.Mul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
@@ -79,9 +72,10 @@ func TestFP16Mul(t *testing.T) {
 
 func TestFP16MulGo(t *testing.T) {
 	debug = true
-	cols, expect := buildMul(4)
-	ts := fp16Mul(4, cols)
-	result := ts.(*Float16).data
+	cols := getCols()
+	expect := computeMul(testRows, cols)
+	x := buildFP16(testRows, cols)
+	result := x.Mul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
@@ -91,14 +85,16 @@ func TestFP16MulGo(t *testing.T) {
 
 func BenchmarkFP16Mul(b *testing.B) {
 	debug = false
+	x := buildFP16(64, 4096)
 	for i := 0; i < b.N; i++ {
-		fp16Mul(64, 4096)
+		x.Mul(x)
 	}
 }
 
 func BenchmarkFP16MulGo(b *testing.B) {
 	debug = true
+	x := buildFP16(64, 4096)
 	for i := 0; i < b.N; i++ {
-		fp16Mul(64, 4096)
+		x.Mul(x)
 	}
 }
