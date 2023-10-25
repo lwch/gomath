@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/lwch/gomath"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/blas32"
 )
 
 func f32MatMul(rows, cols int64) gomath.Tensor {
@@ -41,9 +43,42 @@ func TestF32MatMulGO(t *testing.T) {
 	}
 }
 
-func BenchmarkF32MatMulGO(b *testing.B) {
+func BenchmarkF32MatMulGo(b *testing.B) {
 	debug = true
 	for i := 0; i < b.N; i++ {
 		f32MatMul(64, 4096)
+	}
+}
+
+func goNumMatMul(rows, cols int64) gomath.Tensor {
+	data := make([]float32, rows*cols)
+	for i := range data {
+		data[i] = float32(i) + 1
+	}
+	x := blas32.General{
+		Rows:   int(rows),
+		Cols:   int(cols),
+		Stride: int(cols),
+		Data:   data,
+	}
+	y := blas32.General{
+		Rows:   int(rows),
+		Cols:   int(cols),
+		Stride: int(cols),
+		Data:   data,
+	}
+	z := blas32.General{
+		Rows:   int(rows),
+		Cols:   int(rows),
+		Stride: int(rows),
+		Data:   make([]float32, rows*rows),
+	}
+	blas32.Gemm(blas.NoTrans, blas.Trans, 1, x, y, 0, z)
+	return NewFloat32(z.Data, []int64{rows, rows})
+}
+
+func BenchmarkF32MatMulGoNum(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		goNumMatMul(64, 4096)
 	}
 }
