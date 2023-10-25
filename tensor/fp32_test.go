@@ -8,8 +8,6 @@ import (
 	"gonum.org/v1/gonum/blas/blas32"
 )
 
-const testRows = 8
-
 func buildFP32(rows, cols int64) gomath.Tensor {
 	data := make([]float32, rows*cols)
 	for i := range data {
@@ -20,12 +18,13 @@ func buildFP32(rows, cols int64) gomath.Tensor {
 
 func TestFP32MatMul(t *testing.T) {
 	debug = false
+	rows := getRows()
 	cols := getCols()
-	expect := computeMatMul(testRows, cols)
-	x := buildFP32(testRows, cols)
+	expect := computeMatMul(rows, cols)
+	x := buildFP32(rows, cols)
 	result := x.MatMul(x).(*Float32).data
 	if !equal(result, expect) {
-		t.Fatalf("expect %v, got %v", expect, result)
+		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
 	}
 }
 
@@ -39,12 +38,13 @@ func BenchmarkFP32MatMul(b *testing.B) {
 
 func TestFP32MatMulGo(t *testing.T) {
 	debug = true
+	rows := getRows()
 	cols := getCols()
-	expect := computeMatMul(testRows, cols)
-	x := buildFP32(testRows, cols)
+	expect := computeMatMul(rows, cols)
+	x := buildFP32(rows, cols)
 	result := x.MatMul(x).(*Float32).data
 	if !equal(result, expect) {
-		t.Fatalf("expect %v, got %v", expect, result)
+		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
 	}
 }
 

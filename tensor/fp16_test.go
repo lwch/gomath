@@ -17,14 +17,15 @@ func buildFP16(rows, cols int64) gomath.Tensor {
 
 func TestFP16MatMul(t *testing.T) {
 	debug = false
+	rows := getRows()
 	cols := getCols()
-	expect := computeMatMul(testRows, cols)
-	x := buildFP16(testRows, cols)
+	expect := computeMatMul(rows, cols)
+	x := buildFP16(rows, cols)
 	result := x.MatMul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
-		t.Fatalf("expect=%v, got=%v", expect, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }
 
@@ -38,14 +39,15 @@ func BenchmarkFP16MatMul(b *testing.B) {
 
 func TestFP16MatMulGo(t *testing.T) {
 	debug = true
+	rows := getRows()
 	cols := getCols()
-	expect := computeMatMul(testRows, cols)
-	x := buildFP16(testRows, cols)
+	expect := computeMatMul(rows, cols)
+	x := buildFP16(rows, cols)
 	result := x.MatMul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
-		t.Fatalf("expect=%v, got=%v", expect, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }
 
@@ -59,27 +61,29 @@ func BenchmarkFP16MatMulGo(b *testing.B) {
 
 func TestFP16Mul(t *testing.T) {
 	debug = false
+	rows := getRows()
 	cols := getCols()
-	expect := computeMul(testRows, cols)
-	x := buildFP16(testRows, cols)
+	expect := computeMul(rows, cols)
+	x := buildFP16(rows, cols)
 	result := x.Mul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
-		t.Fatalf("expect=%v, got=%v", expect, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }
 
 func TestFP16MulGo(t *testing.T) {
 	debug = true
+	rows := getRows()
 	cols := getCols()
-	expect := computeMul(testRows, cols)
-	x := buildFP16(testRows, cols)
+	expect := computeMul(rows, cols)
+	x := buildFP16(rows, cols)
 	result := x.Mul(x).(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
-		t.Fatalf("expect=%v, got=%v", expect, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }
 

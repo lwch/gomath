@@ -1,9 +1,15 @@
 package tensor
 
 import (
+	"math/rand"
+
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/internal/half"
 )
+
+func getRows() int64 {
+	return rand.Int63n(8)
+}
 
 func getCols() int64 {
 	var cols int64
