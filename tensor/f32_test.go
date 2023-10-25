@@ -20,10 +20,11 @@ func f32MatMul(rows, cols int64) gomath.Tensor {
 
 func TestF32MatMul(t *testing.T) {
 	debug = false
-	ts := f32MatMul(2, 3)
+	cols, expect := build(2)
+	ts := f32MatMul(2, cols)
 	result := ts.(*Float32).data
-	if result[0] != 14 || result[1] != 32 || result[2] != 32 || result[3] != 77 {
-		t.Fatal(result)
+	if !equal(result, expect) {
+		t.Fatalf("expect %v, got %v", expect, result)
 	}
 }
 
@@ -36,10 +37,11 @@ func BenchmarkF32MatMul(b *testing.B) {
 
 func TestF32MatMulGO(t *testing.T) {
 	debug = true
-	ts := f32MatMul(2, 3)
+	cols, expect := build(2)
+	ts := f32MatMul(2, cols)
 	result := ts.(*Float32).data
-	if result[0] != 14 || result[1] != 32 || result[2] != 32 || result[3] != 77 {
-		t.Fatal(result)
+	if !equal(result, expect) {
+		t.Fatalf("expect %v, got %v", expect, result)
 	}
 }
 

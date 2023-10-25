@@ -76,8 +76,7 @@ func (t *Float32) matMul(t2 *Float32) gomath.Tensor {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
 	}
 	if !sizeMatch(size1, size2) {
-		// TODO: broadcast
-		panic(fmt.Errorf("size mismatch: %v and %v", t.Size(), t2.Size()))
+		panic(ErrBroadcast)
 	}
 	head := count(size1)
 	if head == 0 {
@@ -160,14 +159,5 @@ func convertFloat32ToFloat16(t *Float32) gomath.Tensor {
 		data[i] = half.Encode(v)
 	}
 	return NewFloat16Raw(data, t.Size(),
-		gomath.WithDevice(t.Device()))
-}
-
-func convertFloat32ToFloat64(t *Float32) gomath.Tensor {
-	data := make([]float64, len(t.data))
-	for i, v := range t.data {
-		data[i] = float64(v)
-	}
-	return NewFloat64(data, t.Size(),
 		gomath.WithDevice(t.Device()))
 }

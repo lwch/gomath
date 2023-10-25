@@ -42,3 +42,15 @@ func equalF16(data []uint16, expect []float64) bool {
 	}
 	return true
 }
+
+func equal[T float32 | float64](data []T, expect []float64) bool {
+	if len(data) != len(expect) {
+		return false
+	}
+	for i, v := range data {
+		if v != T(expect[i]) {
+			return false
+		}
+	}
+	return true
+}
