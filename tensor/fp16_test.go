@@ -7,7 +7,7 @@ import (
 	"github.com/lwch/gomath/internal/half"
 )
 
-func f16MatMul(rows, cols int64) gomath.Tensor {
+func fp16MatMul(rows, cols int64) gomath.Tensor {
 	data := make([]float32, rows*cols)
 	for i := range data {
 		data[i] = float32(i) + 1
@@ -17,10 +17,10 @@ func f16MatMul(rows, cols int64) gomath.Tensor {
 	return x.MatMul(y)
 }
 
-func TestF16MatMul(t *testing.T) {
+func TestFP16MatMul(t *testing.T) {
 	debug = false
 	cols, expect := build(2)
-	ts := f16MatMul(2, cols)
+	ts := fp16MatMul(2, cols)
 	result := ts.(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
@@ -29,17 +29,17 @@ func TestF16MatMul(t *testing.T) {
 	}
 }
 
-func BenchmarkF16MatMul(b *testing.B) {
+func BenchmarkFP16MatMul(b *testing.B) {
 	debug = false
 	for i := 0; i < b.N; i++ {
-		f16MatMul(64, 4096)
+		fp16MatMul(64, 4096)
 	}
 }
 
-func TestF16MatMulGO(t *testing.T) {
+func TestFP16MatMulGO(t *testing.T) {
 	debug = true
 	cols, expect := build(2)
-	ts := f16MatMul(2, cols)
+	ts := fp16MatMul(2, cols)
 	result := ts.(*Float16).data
 	if !equalF16(result, expect) {
 		tmp := make([]float32, len(result))
@@ -48,9 +48,9 @@ func TestF16MatMulGO(t *testing.T) {
 	}
 }
 
-func BenchmarkF16MatMulGo(b *testing.B) {
+func BenchmarkFP16MatMulGo(b *testing.B) {
 	debug = true
 	for i := 0; i < b.N; i++ {
-		f16MatMul(64, 4096)
+		fp16MatMul(64, 4096)
 	}
 }
