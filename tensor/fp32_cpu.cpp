@@ -1,33 +1,33 @@
 #include "../info.h"
 #include "exception.hpp"
-#include "f32.h"
+#include "fp32.h"
 #include <stdio.h>
 
 #if !(defined(__APPLE__) && defined(__arm64__))
 
 #include <immintrin.h>
 
-typedef float (*fn_f32_dot_vector)(float *, float *, int64_t);
-static fn_f32_dot_vector f32_dot_vector_impl = nullptr;
+typedef float (*fn_fp32_dot_vector)(float *, float *, int64_t);
+static fn_fp32_dot_vector fp32_dot_vector_impl = nullptr;
 
-bool f32_init() {
+bool fp32_init() {
   if (has_avx512()) {
-    extern float f32_dot_vector_avx512(float *, float *, int64_t);
-    f32_dot_vector_impl = f32_dot_vector_avx512;
+    extern float fp32_dot_vector_avx512(float *, float *, int64_t);
+    fp32_dot_vector_impl = fp32_dot_vector_avx512;
     return true;
   } else if (has_avx()) {
-    extern float f32_dot_vector_avx(float *, float *, int64_t);
-    f32_dot_vector_impl = f32_dot_vector_avx;
+    extern float fp32_dot_vector_avx(float *, float *, int64_t);
+    fp32_dot_vector_impl = fp32_dot_vector_avx;
     return true;
   }
   return false;
 }
 
-float f32_dot_vector(float *x, float *w, int64_t d) {
-  return f32_dot_vector_impl(x, w, d);
+float fp32_dot_vector(float *x, float *w, int64_t d) {
+  return fp32_dot_vector_impl(x, w, d);
 }
 
-float f32_dot_vector_avx(float *x, float *w, int64_t d) {
+float fp32_dot_vector_avx(float *x, float *w, int64_t d) {
   const size_t bs = 8;
   size_t np = (d & ~(bs - 1));
   __m256 y_vec = _mm256_setzero_ps();
@@ -53,7 +53,7 @@ float f32_dot_vector_avx(float *x, float *w, int64_t d) {
   return y;
 }
 
-float f32_dot_vector_avx512(float *x, float *w, int64_t d) {
+float fp32_dot_vector_avx512(float *x, float *w, int64_t d) {
   const size_t bs = 16;
   size_t np = (d & ~(bs - 1));
   __m512 y_vec = _mm512_setzero_ps();

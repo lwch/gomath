@@ -8,8 +8,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-bool f32_init();
-float f32_dot_vector(float *x, float *w, int64_t d);
+bool fp32_init();
+float fp32_dot_vector(float *x, float *w, int64_t d);
 
 #ifdef __cplusplus
 }

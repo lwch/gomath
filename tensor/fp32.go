@@ -1,6 +1,6 @@
 package tensor
 
-// #include "f32.h"
+// #include "fp32.h"
 import "C"
 
 import (
@@ -103,7 +103,7 @@ func (t *Float32) cMatMul(t2 *Float32, size []int64, head, m, n, d int64) gomath
 					offset1 := offset1 + rows*d
 					for cols := int64(0); cols < n; cols++ {
 						offset2 := offset2 + cols*d
-						data[idx] = float32(C.f32_dot_vector(
+						data[idx] = float32(C.fp32_dot_vector(
 							(*C.float)(unsafe.Add(p1, uintptr(offset1*4))),
 							(*C.float)(unsafe.Add(p2, uintptr(offset2*4))),
 							C.int64_t(d)))

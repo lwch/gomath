@@ -8,12 +8,12 @@ extern "C" {
 #include "_cgo_export.h"
 #include <stdint.h>
 
-inline float f16_to_f32(uint16_t n) {
+inline float fp16_to_fp32(uint16_t n) {
   extern GoFloat32 Decode(GoUint16);
   return Decode(n);
 }
 
-inline uint16_t f32_to_f16(float n) {
+inline uint16_t fp32_to_fp16(float n) {
   extern GoUint16 Encode(GoFloat32);
   return Encode(n);
 }
