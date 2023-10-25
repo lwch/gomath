@@ -10,6 +10,7 @@ import (
 
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/consts"
+	"github.com/lwch/gomath/internal/half"
 	"github.com/lwch/gomath/internal/tensor"
 )
 
@@ -59,8 +60,8 @@ func (t *Float32) Div(t2 gomath.Tensor) gomath.Tensor {
 // MatMul (..., m, d) @ (..., n, d) -> (..., m, n)
 func (t *Float32) MatMul(t2 gomath.Tensor) gomath.Tensor {
 	switch t2.Type() {
-	case consts.BFloat16:
-		return t.MatMul(convert(t2, consts.Float32))
+	case consts.Float16:
+		return t.matMul(convert(t2, consts.Float32).(*Float32))
 	case consts.Float32:
 		return t.matMul(t2.(*Float32))
 	default:
@@ -82,7 +83,7 @@ func (t *Float32) matMul(t2 *Float32) gomath.Tensor {
 	if head == 0 {
 		head = 1
 	}
-	if computeInC() {
+	if computeInC(consts.Float32) {
 		return t.cMatMul(t2, size1, head, m, n, d1)
 	}
 	return t.goMatMul(t2, size1, head, m, n, d1)
@@ -153,16 +154,20 @@ func (t *Float32) View(shape []int64) gomath.Tensor {
 	panic("implement me")
 }
 
-func float32ToBF16(f32 float32) uint16 {
-	u32 := *(*uint32)(unsafe.Pointer(&f32))
-	return uint16(u32 >> 16)
-}
-
-func convertFloat32ToBFloat16(t *Float32) *BFloat16 {
+func convertFloat32ToFloat16(t *Float32) gomath.Tensor {
 	data := make([]uint16, len(t.data))
 	for i, v := range t.data {
-		data[i] = float32ToBF16(v)
+		data[i] = half.Encode(v)
 	}
-	return NewBFloat16(data, t.Size(),
+	return NewFloat16Raw(data, t.Size(),
+		gomath.WithDevice(t.Device()))
+}
+
+func convertFloat32ToFloat64(t *Float32) gomath.Tensor {
+	data := make([]float64, len(t.data))
+	for i, v := range t.data {
+		data[i] = float64(v)
+	}
+	return NewFloat64(data, t.Size(),
 		gomath.WithDevice(t.Device()))
 }

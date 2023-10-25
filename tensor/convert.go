@@ -7,8 +7,8 @@ import (
 
 func convert(t gomath.Tensor, dtype consts.Type) gomath.Tensor {
 	switch t.Type() {
-	case consts.BFloat16:
-		return convertBFloat16(t.(*BFloat16), dtype)
+	case consts.Float16:
+		return convertFloat16(t.(*Float16), dtype)
 	case consts.Float32:
 		return convertFloat32(t.(*Float32), dtype)
 	default:
@@ -16,18 +16,26 @@ func convert(t gomath.Tensor, dtype consts.Type) gomath.Tensor {
 	}
 }
 
-func convertBFloat16(t *BFloat16, dtype consts.Type) gomath.Tensor {
+func convertFloat16(t *Float16, dtype consts.Type) gomath.Tensor {
 	switch dtype {
+	case consts.Float16:
+		panic("no need")
 	case consts.Float32:
-		return convertBFloat16ToFloat32(t)
+		return convertFloat16ToFloat32(t)
+	case consts.Float64:
+		return convertFloat16ToFloat64(t)
 	}
 	panic("not support")
 }
 
 func convertFloat32(t *Float32, dtype consts.Type) gomath.Tensor {
 	switch dtype {
-	case consts.BFloat16:
-		return convertFloat32ToBFloat16(t)
+	case consts.Float16:
+		return convertFloat32ToFloat16(t)
+	case consts.Float32:
+		panic("no need")
+	case consts.Float64:
+		return convertFloat32ToFloat64(t)
 	}
 	panic("not support")
 }

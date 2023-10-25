@@ -4,23 +4,16 @@ import (
 	"sync"
 
 	"github.com/lwch/gomath"
+	"github.com/lwch/gomath/consts"
 )
 
-var debug bool
-
-func computeInC() bool {
+func computeInC(t consts.Type) bool {
 	if debug {
 		return false
 	}
-	switch {
-	case gomath.HasAVX512():
-		return true
-	case gomath.HasAVX():
-		return true
-	// case gomath.HasSSE3():
-	// 	return true
-	// case gomath.HasSSSE3():
-	// 	return true
+	switch t {
+	case consts.Float32:
+		return f32ComputeInC
 	default:
 		return false
 	}
