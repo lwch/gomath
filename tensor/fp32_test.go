@@ -20,7 +20,7 @@ func fp32MatMul(rows, cols int64) gomath.Tensor {
 
 func TestFP32MatMul(t *testing.T) {
 	debug = false
-	cols, expect := build(2)
+	cols, expect := buildMatMul(2)
 	ts := fp32MatMul(2, cols)
 	result := ts.(*Float32).data
 	if !equal(result, expect) {
@@ -35,9 +35,9 @@ func BenchmarkFP32MatMul(b *testing.B) {
 	}
 }
 
-func TestFP32MatMulGO(t *testing.T) {
+func TestFP32MatMulGo(t *testing.T) {
 	debug = true
-	cols, expect := build(2)
+	cols, expect := buildMatMul(2)
 	ts := fp32MatMul(2, cols)
 	result := ts.(*Float32).data
 	if !equal(result, expect) {

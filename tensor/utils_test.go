@@ -5,7 +5,7 @@ import (
 	"github.com/lwch/gomath/internal/half"
 )
 
-func build(rows int64) (int64, []float64) {
+func buildMatMul(rows int64) (int64, []float64) {
 	var cols int64
 	if gomath.HasAVX512() {
 		cols = 16 + 8
@@ -27,6 +27,26 @@ func build(rows int64) (int64, []float64) {
 			}
 			output[m*rows+n] = dx
 		}
+	}
+	return cols, output
+}
+
+func buildMul(rows int64) (int64, []float64) {
+	var cols int64
+	if gomath.HasAVX512() {
+		cols = 16 + 8
+	} else if gomath.HasAVX() {
+		cols = 8 + 4
+	} else {
+		cols = 3
+	}
+	x := make([]float64, rows*cols)
+	for i := range x {
+		x[i] = float64(i) + 1
+	}
+	output := make([]float64, rows*cols)
+	for i := int64(0); i < rows*cols; i++ {
+		output[i] = x[i] * x[i]
 	}
 	return cols, output
 }

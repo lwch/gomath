@@ -9,23 +9,16 @@
 #include <immintrin.h>
 
 typedef uint16_t (*fn_fp16_dot_vector)(uint16_t *, uint16_t *, int64_t);
+typedef void (*fn_fp16_mul_vector)(uint16_t *, uint16_t *, uint16_t *, int64_t);
 static fn_fp16_dot_vector fp16_dot_vector_impl = nullptr;
-
-bool fp16_init() {
-  if (has_avx512()) {
-    extern uint16_t fp16_dot_vector_avx512(uint16_t *, uint16_t *, int64_t);
-    fp16_dot_vector_impl = fp16_dot_vector_avx512;
-    return true;
-  } else if (has_avx()) {
-    extern uint16_t fp16_dot_vector_avx(uint16_t *, uint16_t *, int64_t);
-    fp16_dot_vector_impl = fp16_dot_vector_avx;
-    return true;
-  }
-  return false;
-}
+static fn_fp16_mul_vector fp16_mul_vector_impl = nullptr;
 
 uint16_t fp16_dot_vector(uint16_t *x, uint16_t *w, int64_t d) {
   return fp16_dot_vector_impl(x, w, d);
+}
+
+void fp16_mul_vector(uint16_t *x, uint16_t *w, uint16_t *y, int64_t d) {
+  fp16_mul_vector_impl(x, w, y, d);
 }
 
 inline __m256 _mm256_fp16_load(uint16_t *x) {
@@ -106,6 +99,38 @@ uint16_t fp16_dot_vector_avx512(uint16_t *x, uint16_t *w, int64_t d) {
     y += fp16_to_fp32(x[i]) * fp16_to_fp32(w[i]);
   }
   return fp32_to_fp16(y);
+}
+
+void fp16_mul_vector_avx(uint16_t *x, uint16_t *w, uint16_t *y, int64_t d) {
+  const size_t bs = 8;
+  size_t np = (d & ~(bs - 1));
+  for (size_t i = 0; i < np; i += bs) {
+    __m256 x_vec = _mm256_fp16_load(x);
+    __m256 w_vec = _mm256_fp16_load(w);
+    __m128i dy = _mm256_cvtps_ph(_mm256_mul_ps(x_vec, w_vec), 0);
+    _mm_storeu_si128((__m128i *)y, dy);
+    x += bs;
+    w += bs;
+    y += bs;
+  }
+  for (size_t i = 0; i < d - np; i++) {
+    y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) * fp16_to_fp32(w[i]));
+  }
+}
+
+void fp16_mul_vector_avx512(uint16_t *x, uint16_t *w, uint16_t *y, int64_t d) {}
+
+bool fp16_init() {
+  if (has_avx512()) {
+    fp16_dot_vector_impl = fp16_dot_vector_avx512;
+    fp16_mul_vector_impl = fp16_mul_vector_avx512;
+    return true;
+  } else if (has_avx()) {
+    fp16_dot_vector_impl = fp16_dot_vector_avx;
+    fp16_mul_vector_impl = fp16_mul_vector_avx;
+    return true;
+  }
+  return false;
 }
 
 #endif

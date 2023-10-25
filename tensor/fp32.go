@@ -70,8 +70,8 @@ func (t *Float32) MatMul(t2 gomath.Tensor) gomath.Tensor {
 }
 
 func (t *Float32) matMul(t2 *Float32) gomath.Tensor {
-	size1, m, d1 := splitSize(t)
-	size2, n, d2 := splitSize(t2)
+	size1, m, d1 := splitSize2(t)
+	size2, n, d2 := splitSize2(t2)
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
 	}

@@ -65,7 +65,63 @@ func (t *Float16) Sub(t2 gomath.Tensor) gomath.Tensor {
 }
 
 func (t *Float16) Mul(t2 gomath.Tensor) gomath.Tensor {
-	panic("implement me")
+	switch t2.Type() {
+	case consts.Float16:
+		return t.mul(t2.(*Float16))
+	case consts.Float32:
+		return convert(t, consts.Float32).Mul(t2)
+	default:
+		panic(ErrNotSupported)
+	}
+}
+
+func (t *Float16) mul(t2 *Float16) gomath.Tensor {
+	size1, d1 := splitSize1(t)
+	size2, d2 := splitSize1(t2)
+	if d1 != d2 {
+		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
+	}
+	if !sizeMatch(size1, size2) {
+		panic(ErrBroadcast)
+	}
+	head := count(size1)
+	if head == 0 {
+		head = 1
+	}
+	if computeInC(consts.Float32) {
+		return t.cMul(t2, size1, head, d1)
+	}
+	return t.goMul(t2, size2, head, d1)
+}
+
+func (t *Float16) cMul(t2 *Float16, size []int64, head, d int64) gomath.Tensor {
+	data := make([]uint16, head*d)
+	core := int64(runtime.NumCPU())
+	parallel(head*d, core, func(_, offset, size int64) {
+		p1 := unsafe.Pointer(unsafe.SliceData(t.data))
+		p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
+		p3 := unsafe.Pointer(unsafe.SliceData(data))
+		C.fp16_mul_vector(
+			(*C.uint16_t)(unsafe.Add(p1, uintptr(offset*2))),
+			(*C.uint16_t)(unsafe.Add(p2, uintptr(offset*2))),
+			(*C.uint16_t)(unsafe.Add(p3, uintptr(offset*2))),
+			C.int64_t(size))
+	})
+	return NewFloat16Raw(data, append(size, d),
+		gomath.WithDevice(t.Device()))
+}
+
+func (t *Float16) goMul(t2 *Float16, size []int64, head, d int64) gomath.Tensor {
+	data := make([]uint16, head*d)
+	core := int64(runtime.NumCPU())
+	parallel(head*d, core, func(_, offset, size int64) {
+		end := offset + size
+		for ; offset < end; offset++ {
+			data[offset] = half.Encode(half.Decode(t.data[offset]) * half.Decode(t2.data[offset]))
+		}
+	})
+	return NewFloat16Raw(data, append(size, d),
+		gomath.WithDevice(t.Device()))
 }
 
 func (t *Float16) Div(t2 gomath.Tensor) gomath.Tensor {
@@ -79,13 +135,13 @@ func (t *Float16) MatMul(t2 gomath.Tensor) gomath.Tensor {
 	case consts.Float32:
 		return convert(t, consts.Float32).MatMul(t2)
 	default:
-		panic("not supported")
+		panic(ErrNotSupported)
 	}
 }
 
 func (t *Float16) matMul(t2 *Float16) gomath.Tensor {
-	size1, m, d1 := splitSize(t)
-	size2, n, d2 := splitSize(t2)
+	size1, m, d1 := splitSize2(t)
+	size2, n, d2 := splitSize2(t2)
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
 	}

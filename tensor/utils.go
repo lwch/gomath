@@ -21,7 +21,12 @@ func computeInC(t consts.Type) bool {
 	}
 }
 
-func splitSize(t gomath.Tensor) ([]int64, int64, int64) {
+func splitSize1(t gomath.Tensor) ([]int64, int64) {
+	size := t.Size()
+	return size[:len(size)-1], size[len(size)-1]
+}
+
+func splitSize2(t gomath.Tensor) ([]int64, int64, int64) {
 	size := t.Size()
 	return size[:len(size)-2], size[len(size)-2], size[len(size)-1]
 }
