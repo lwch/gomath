@@ -1,11 +1,21 @@
 package half
 
+import "C"
+
 import "unsafe"
 
-// Decode http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
+// http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
+
+//export Decode
 func Decode(u16 uint16) float32 {
 	n := mantissaTable[offsetTable[u16>>10]+uint32(u16&0x3ff)] + exponentTable[u16>>10]
 	return *(*float32)(unsafe.Pointer(&n))
+}
+
+func DecodeArray(data []uint16, output []float32) {
+	for i, u := range data {
+		output[i] = Decode(u)
+	}
 }
 
 var mantissaTable [2048]uint32

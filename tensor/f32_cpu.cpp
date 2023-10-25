@@ -8,7 +8,7 @@
 #include <immintrin.h>
 
 typedef float (*fn_f32_dot_vector)(float *, float *, int64_t);
-fn_f32_dot_vector f32_dot_vector_impl = nullptr;
+static fn_f32_dot_vector f32_dot_vector_impl = nullptr;
 
 bool f32_init() {
   if (has_avx512()) {
@@ -47,7 +47,7 @@ float f32_dot_vector_avx(float *x, float *w, int64_t d) {
   __m128 t1 = _mm_hadd_ps(t0, t0);
   t1 = _mm_hadd_ps(t1, t1);
   float y = _mm_cvtss_f32(t1);
-  for (size_t i = np; i < d; i++) {
+  for (size_t i = 0; i < d - np; i++) {
     y += x[i] * w[i];
   }
   return y;
@@ -75,7 +75,7 @@ float f32_dot_vector_avx512(float *x, float *w, int64_t d) {
   __m128 t2 = _mm_hadd_ps(t1, t1);
   t2 = _mm_hadd_ps(t2, t2);
   float y = _mm_cvtss_f32(t2);
-  for (size_t i = np; i < d; i++) {
+  for (size_t i = 0; i < d - np; i++) {
     y += x[i] * w[i];
   }
   return y;

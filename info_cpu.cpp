@@ -3,12 +3,7 @@
 // code from
 // https://stackoverflow.com/questions/6121792/how-to-check-if-a-cpu-supports-the-sse3-instruction-set
 
-#if defined(__APPLE__) && defined(__arm64__)
-
-bool has_avx() { return false; }
-bool has_avx512() { return false; }
-
-#else
+#if !(defined(__APPLE__) && defined(__arm64__))
 
 #ifdef _WIN32
 

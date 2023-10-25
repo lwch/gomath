@@ -12,6 +12,8 @@ func computeInC(t consts.Type) bool {
 		return false
 	}
 	switch t {
+	case consts.Float16:
+		return f16ComputeInC
 	case consts.Float32:
 		return f32ComputeInC
 	default:
