@@ -92,22 +92,27 @@ func (t *Float32) cMatMul(t2 *Float32, size []int64, head, m, n, d int64) gomath
 	data := make([]float32, head*m*n)
 	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
 	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
-	for block := int64(0); block < head; block++ {
-		offset1 := block * m * d
-		offset2 := block * n * d
-		idx := block * m * n
-		for rows := int64(0); rows < m; rows++ {
-			offset1 := offset1 + rows*d
-			for cols := int64(0); cols < n; cols++ {
-				offset2 := offset2 + cols*d
-				data[idx] = float32(C.fp32_dot_vector(
-					(*C.float)(unsafe.Add(p1, uintptr(offset1*4))),
-					(*C.float)(unsafe.Add(p2, uintptr(offset2*4))),
-					C.int64_t(d)))
-				idx++
-			}
+	core := runtime.NumCPU()
+	parallel(head, int64(core), func(_, offset, size int64) {
+		for block := offset; block < offset+size; block++ {
+			offset1 := block * m * d
+			offset2 := block * n * d
+			idx := block * m * n
+			parallel(m, int64(core), func(batch, offset, size int64) {
+				for rows := int64(0); rows < m; rows++ {
+					offset1 := offset1 + rows*d
+					idx := idx + rows*n
+					for cols := int64(0); cols < n; cols++ {
+						offset2 := offset2 + cols*d
+						data[idx+cols] = float32(C.fp32_dot_vector(
+							(*C.float)(unsafe.Add(p1, uintptr(offset1*4))),
+							(*C.float)(unsafe.Add(p2, uintptr(offset2*4))),
+							C.int64_t(d)))
+					}
+				}
+			})
 		}
-	}
+	})
 	return NewFloat32(data, append(size, m, n),
 		gomath.WithDevice(t.Device()))
 }

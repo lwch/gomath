@@ -96,11 +96,16 @@ func (t *Float16) mul(t2 *Float16) gomath.Tensor {
 
 func (t *Float16) cMul(t2 *Float16, size []int64, head, d int64) gomath.Tensor {
 	data := make([]uint16, head*d)
-	C.fp16_mul_vector(
-		(*C.uint16_t)(unsafe.SliceData(t.data)),
-		(*C.uint16_t)(unsafe.SliceData(t2.data)),
-		(*C.uint16_t)(unsafe.SliceData(data)),
-		C.int64_t(head*d))
+	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
+	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
+	p3 := unsafe.Pointer(unsafe.SliceData(data))
+	parallel(head*d, int64(runtime.NumCPU()), func(_, offset, size int64) {
+		C.fp16_mul_vector(
+			(*C.uint16_t)(unsafe.Add(p1, uintptr(offset*2))),
+			(*C.uint16_t)(unsafe.Add(p2, uintptr(offset*2))),
+			(*C.uint16_t)(unsafe.Add(p3, uintptr(offset*2))),
+			C.int64_t(size))
+	})
 	return NewFloat16Raw(data, append(size, d),
 		gomath.WithDevice(t.Device()))
 }
@@ -156,22 +161,27 @@ func (t *Float16) cMatMul(t2 *Float16, size []int64, head, m, n, d int64) gomath
 	data := make([]uint16, head*m*n)
 	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
 	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
-	for block := int64(0); block < head; block++ {
-		offset1 := block * m * d
-		offset2 := block * n * d
-		idx := block * m * n
-		for rows := int64(0); rows < m; rows++ {
-			offset1 := offset1 + rows*d
-			for cols := int64(0); cols < n; cols++ {
-				offset2 := offset2 + cols*d
-				data[idx] = uint16(C.fp16_dot_vector(
-					(*C.uint16_t)(unsafe.Add(p1, uintptr(offset1*2))),
-					(*C.uint16_t)(unsafe.Add(p2, uintptr(offset2*2))),
-					C.int64_t(d)))
-				idx++
-			}
+	core := runtime.NumCPU()
+	parallel(head, int64(core), func(_, offset, size int64) {
+		for block := offset; block < offset+size; block++ {
+			offset1 := block * m * d
+			offset2 := block * n * d
+			idx := block * m * n
+			parallel(m, int64(core), func(_, offset, size int64) {
+				for rows := offset; rows < offset+size; rows++ {
+					offset1 := offset1 + rows*d
+					idx := idx + rows*n
+					for cols := int64(0); cols < n; cols++ {
+						offset2 := offset2 + cols*d
+						data[idx+cols] = uint16(C.fp16_dot_vector(
+							(*C.uint16_t)(unsafe.Add(p1, uintptr(offset1*2))),
+							(*C.uint16_t)(unsafe.Add(p2, uintptr(offset2*2))),
+							C.int64_t(d)))
+					}
+				}
+			})
 		}
-	}
+	})
 	return NewFloat16Raw(data, append(size, m, n),
 		gomath.WithDevice(t.Device()))
 }
