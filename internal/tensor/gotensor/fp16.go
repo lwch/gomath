@@ -17,3 +17,10 @@ func (*GoTensor) FP16Mul(x, w, y []uint16) {
 		y[i] = half.Encode(half.Decode(x[i]) * half.Decode(w[i]))
 	}
 }
+
+func (*GoTensor) FP16MulScalar(x []uint16, w uint16, y []uint16) {
+	dw := half.Decode(w)
+	for i := range x {
+		y[i] = half.Encode(half.Decode(x[i]) * dw)
+	}
+}

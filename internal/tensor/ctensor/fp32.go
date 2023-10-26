@@ -19,3 +19,12 @@ func (*CTensor) FP32Mul(x, w, y []float32) {
 		C.int64_t(len(x)),
 	)
 }
+
+func (*CTensor) FP32MulScalar(x []float32, w float32, y []float32) {
+	C.fp32_mul_scalar(
+		(*C.float)(&x[0]),
+		C.float(w),
+		(*C.float)(&y[0]),
+		C.int64_t(len(x)),
+	)
+}

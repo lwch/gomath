@@ -14,6 +14,8 @@ public:
                               int64_t d) = 0;
   virtual void mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) = 0;
+  virtual void mul_scalar(const uint16_t *x, const uint16_t w, uint16_t *y,
+                          int64_t d) = 0;
 };
 
 // load fp16 into register
@@ -112,6 +114,16 @@ template <> inline void _fp16_store_ps(uint16_t *y, const __m128i &x) {
 template <> inline void _fp16_store_ps(uint16_t *y, const __m256i &x) {
   _mm256_storeu_si256((__m256i *)y, x);
 }
+
+// set1
+
+template <typename T> inline T _fp16_set1_ps(float x) {
+  throw not_implemented_exception("_fp16_set1_ps");
+}
+
+template <> inline __m256 _fp16_set1_ps(float x) { return _mm256_set1_ps(x); }
+
+template <> inline __m512 _fp16_set1_ps(float x) { return _mm512_set1_ps(x); }
 
 #endif
 

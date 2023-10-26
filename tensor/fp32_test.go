@@ -128,3 +128,49 @@ func BenchmarkFP32MulGo(b *testing.B) {
 		x.Mul(x)
 	}
 }
+
+func TestFP32MulScalar(t *testing.T) {
+	debug = false
+	scalar := getScalar()
+	rows := getRows()
+	cols := getCols()
+	expect := computeMulScalar(rows, cols, scalar)
+	x := buildFP32(rows, cols)
+	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func TestFP32MulScalarGo(t *testing.T) {
+	debug = true
+	scalar := getScalar()
+	rows := getRows()
+	cols := getCols()
+	expect := computeMulScalar(rows, cols, scalar)
+	x := buildFP32(rows, cols)
+	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func BenchmarkFP32MulScalar(b *testing.B) {
+	debug = false
+	scalar := getScalar()
+	x := buildFP32(64, 4096)
+	w := NewFloat32([]float32{scalar}, []int64{1})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}
+
+func BenchmarkFP32MulScalarGo(b *testing.B) {
+	debug = true
+	scalar := getScalar()
+	x := buildFP32(64, 4096)
+	w := NewFloat32([]float32{scalar}, []int64{1})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}

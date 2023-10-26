@@ -45,6 +45,22 @@ public:
       y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) * fp16_to_fp32(w[i]));
     }
   }
+
+  virtual void mul_scalar(const uint16_t *x, uint16_t w, uint16_t *y,
+                          int64_t d) {
+    size_t np = (d & ~(bs - 1));
+    T w_vec = _fp16_set1_ps<T>(fp16_to_fp32(w));
+    for (size_t i = 0; i < np; i += bs) {
+      T x_vec = _fp16_loadu<T>(x);
+      T2 y_vec = _fp16_mul_ps<T, T2>(x_vec, w_vec);
+      _fp16_store_ps(y, y_vec);
+      x += bs;
+      y += bs;
+    }
+    for (size_t i = 0; i < d - np; i++) {
+      y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) * fp16_to_fp32(w));
+    }
+  }
 };
 
 static fp16 *_fp16;
@@ -67,6 +83,10 @@ uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d) {
 void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
   _fp16->mul_vector(x, w, y, d);
+}
+
+void fp16_mul_scalar(const uint16_t *x, uint16_t w, uint16_t *y, int64_t d) {
+  _fp16->mul_scalar(x, w, y, d);
 }
 
 #endif

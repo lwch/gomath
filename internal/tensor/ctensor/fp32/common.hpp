@@ -12,6 +12,8 @@ public:
   virtual float dot_vector(const float *x, const float *w, int64_t d) = 0;
   virtual void mul_vector(const float *x, const float *w, float *y,
                           int64_t d) = 0;
+  virtual void mul_scalar(const float *x, const float w, float *y,
+                          int64_t d) = 0;
 };
 
 // load fp32 into register
@@ -107,6 +109,16 @@ template <> inline void _fp32_store_ps(float *y, const __m256 &x) {
 template <> inline void _fp32_store_ps(float *y, const __m512 &x) {
   _mm512_storeu_ps(y, x);
 }
+
+// set1
+
+template <typename T> inline T _fp32_set1_ps(float x) {
+  throw not_implemented_exception("_fp32_set1_ps");
+}
+
+template <> inline __m256 _fp32_set1_ps(float x) { return _mm256_set1_ps(x); }
+
+template <> inline __m512 _fp32_set1_ps(float x) { return _mm512_set1_ps(x); }
 
 #endif
 
