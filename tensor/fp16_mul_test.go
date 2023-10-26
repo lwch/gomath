@@ -36,7 +36,7 @@ func TestFP16MulGo(t *testing.T) {
 
 func BenchmarkFP16Mul(b *testing.B) {
 	debug = false
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.Mul(x)
 	}
@@ -44,7 +44,7 @@ func BenchmarkFP16Mul(b *testing.B) {
 
 func BenchmarkFP16MulGo(b *testing.B) {
 	debug = true
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.Mul(x)
 	}
@@ -83,7 +83,7 @@ func TestFP16MulScalarGo(t *testing.T) {
 func BenchmarkFP16MulScalar(b *testing.B) {
 	debug = false
 	scalar := getScalar()
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	w := NewFloat16([]float32{scalar}, []int64{1})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
@@ -93,7 +93,7 @@ func BenchmarkFP16MulScalar(b *testing.B) {
 func BenchmarkFP16MulScalarGo(b *testing.B) {
 	debug = true
 	scalar := getScalar()
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	w := NewFloat16([]float32{scalar}, []int64{1})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
@@ -130,9 +130,9 @@ func TestFP16MulVectorGo(t *testing.T) {
 
 func BenchmarkFP16MulVector(b *testing.B) {
 	debug = false
-	_, vec := computeMulVector(64, 4096)
-	x := buildFP16(64, 4096)
-	w := NewFloat16(vec, []int64{4096})
+	_, vec := computeMulVector(benchmarkRows, benchmarkCols)
+	x := buildFP16(benchmarkRows, benchmarkCols)
+	w := NewFloat16(vec, []int64{benchmarkCols})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
 	}
@@ -140,9 +140,9 @@ func BenchmarkFP16MulVector(b *testing.B) {
 
 func BenchmarkFP16MulVectorGo(b *testing.B) {
 	debug = true
-	_, vec := computeMulVector(64, 4096)
-	x := buildFP16(64, 4096)
-	w := NewFloat16(vec, []int64{4096})
+	_, vec := computeMulVector(benchmarkRows, benchmarkCols)
+	x := buildFP16(benchmarkRows, benchmarkCols)
+	w := NewFloat16(vec, []int64{benchmarkCols})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
 	}
@@ -178,7 +178,7 @@ func TestFP16DivGo(t *testing.T) {
 
 func BenchmarkFP16Div(b *testing.B) {
 	debug = false
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.Div(x)
 	}
@@ -186,7 +186,7 @@ func BenchmarkFP16Div(b *testing.B) {
 
 func BenchmarkFP16DivGo(b *testing.B) {
 	debug = true
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.Div(x)
 	}
@@ -225,7 +225,7 @@ func TestFP16DivScalarGo(t *testing.T) {
 func BenchmarkFP16DivScalar(b *testing.B) {
 	debug = false
 	scalar := getScalar()
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	w := NewFloat16([]float32{scalar}, []int64{1})
 	for i := 0; i < b.N; i++ {
 		x.Div(w)
@@ -235,7 +235,7 @@ func BenchmarkFP16DivScalar(b *testing.B) {
 func BenchmarkFP16DivScalarGo(b *testing.B) {
 	debug = true
 	scalar := getScalar()
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	w := NewFloat16([]float32{scalar}, []int64{1})
 	for i := 0; i < b.N; i++ {
 		x.Div(w)
@@ -272,9 +272,9 @@ func TestFP16DivVectorGo(t *testing.T) {
 
 func BenchmarkFP16DivVector(b *testing.B) {
 	debug = false
-	_, vec := computeDivVector(64, 4096)
-	x := buildFP16(64, 4096)
-	w := NewFloat16(vec, []int64{4096})
+	_, vec := computeDivVector(benchmarkRows, benchmarkCols)
+	x := buildFP16(benchmarkRows, benchmarkCols)
+	w := NewFloat16(vec, []int64{benchmarkCols})
 	for i := 0; i < b.N; i++ {
 		x.Div(w)
 	}
@@ -282,9 +282,9 @@ func BenchmarkFP16DivVector(b *testing.B) {
 
 func BenchmarkFP16DivVectorGo(b *testing.B) {
 	debug = true
-	_, vec := computeDivVector(64, 4096)
-	x := buildFP16(64, 4096)
-	w := NewFloat16(vec, []int64{4096})
+	_, vec := computeDivVector(benchmarkRows, benchmarkCols)
+	x := buildFP16(benchmarkRows, benchmarkCols)
+	w := NewFloat16(vec, []int64{benchmarkCols})
 	for i := 0; i < b.N; i++ {
 		x.Div(w)
 	}

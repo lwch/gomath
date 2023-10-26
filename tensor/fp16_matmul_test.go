@@ -31,7 +31,7 @@ func TestFP16MatMul(t *testing.T) {
 
 func BenchmarkFP16MatMul(b *testing.B) {
 	debug = false
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.MatMul(x)
 	}
@@ -53,7 +53,7 @@ func TestFP16MatMulGo(t *testing.T) {
 
 func BenchmarkFP16MatMulGo(b *testing.B) {
 	debug = true
-	x := buildFP16(64, 4096)
+	x := buildFP16(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.MatMul(x)
 	}

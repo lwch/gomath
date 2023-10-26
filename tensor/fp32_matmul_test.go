@@ -30,7 +30,7 @@ func TestFP32MatMul(t *testing.T) {
 
 func BenchmarkFP32MatMul(b *testing.B) {
 	debug = false
-	x := buildFP32(64, 4096)
+	x := buildFP32(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.MatMul(x)
 	}
@@ -50,7 +50,7 @@ func TestFP32MatMulGo(t *testing.T) {
 
 func BenchmarkFP32MatMulGo(b *testing.B) {
 	debug = true
-	x := buildFP32(64, 4096)
+	x := buildFP32(benchmarkRows, benchmarkCols)
 	for i := 0; i < b.N; i++ {
 		x.MatMul(x)
 	}
@@ -85,6 +85,6 @@ func fp32GoNumMatMul(rows, cols int64) gomath.Tensor {
 
 func BenchmarkFP32MatMulGoNum(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		fp32GoNumMatMul(64, 4096)
+		fp32GoNumMatMul(benchmarkRows, benchmarkCols)
 	}
 }

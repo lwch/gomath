@@ -8,6 +8,9 @@ import (
 	"github.com/lwch/gomath/internal/half"
 )
 
+const benchmarkRows = 32
+const benchmarkCols = 1024
+
 func getScalar() float32 {
 	return float32(rand.Intn(10) + 1)
 }
