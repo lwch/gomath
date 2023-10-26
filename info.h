@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 bool has_avx();
 bool has_avx512();
 

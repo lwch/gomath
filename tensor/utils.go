@@ -11,14 +11,7 @@ func computeInC(t consts.Type) bool {
 	if debug {
 		return false
 	}
-	switch t {
-	case consts.Float16:
-		return fp16ComputeInC
-	case consts.Float32:
-		return fp32ComputeInC
-	default:
-		return false
-	}
+	return cCompute
 }
 
 func splitSize1(t gomath.Tensor) ([]int64, int64) {
