@@ -58,6 +58,22 @@ public:
       y[i] = x[i] * w;
     }
   }
+
+  virtual void div_vector(const float *x, const float *w, float *y, int64_t d) {
+    size_t np = (d & ~(bs - 1));
+    for (size_t i = 0; i < np; i += bs) {
+      T x_vec = _fp32_loadu<T>(x);
+      T w_vec = _fp32_loadu<T>(w);
+      T y_vec = _fp32_div_ps<T>(x_vec, w_vec);
+      _fp32_store_ps(y, y_vec);
+      x += bs;
+      w += bs;
+      y += bs;
+    }
+    for (size_t i = 0; i < d - np; i++) {
+      y[i] = x[i] / w[i];
+    }
+  }
 };
 
 static fp32 *_fp32;
@@ -83,6 +99,10 @@ void fp32_mul_vector(const float *x, const float *w, float *y, int64_t d) {
 
 void fp32_mul_scalar(const float *x, float w, float *y, int64_t d) {
   _fp32->mul_scalar(x, w, y, d);
+}
+
+void fp32_div_vector(const float *x, const float *w, float *y, int64_t d) {
+  _fp32->div_vector(x, w, y, d);
 }
 
 #endif

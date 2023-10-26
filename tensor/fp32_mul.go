@@ -49,7 +49,7 @@ func (t *Float32) mul(t2 *Float32) gomath.Tensor {
 	head := count(size1)
 	data := make([]float32, head*d1)
 	parallel(head*d1, int64(runtime.NumCPU()), func(_, offset, size int64) {
-		t.impl.FP32Mul(
+		t.impl.FP32MulVector(
 			t.data[offset:offset+size],
 			t2.data[offset:offset+size],
 			data[offset:offset+size])
@@ -75,7 +75,7 @@ func (*Float32) mulVector(t *Float32, vector []float32, counts int64) gomath.Ten
 	parallel(counts, int64(runtime.NumCPU()), func(_, offset, size int64) {
 		for i := offset; i < offset+size; i++ {
 			offset := i * n
-			t.impl.FP32Mul(t.data[offset:offset+n], vector, data[offset:offset+n])
+			t.impl.FP32MulVector(t.data[offset:offset+n], vector, data[offset:offset+n])
 		}
 	})
 	return NewFloat32(data, t.Size(),
@@ -83,5 +83,64 @@ func (*Float32) mulVector(t *Float32, vector []float32, counts int64) gomath.Ten
 }
 
 func (t *Float32) Div(t2 gomath.Tensor) gomath.Tensor {
-	panic("implement me")
+	switch t2.Type() {
+	case consts.Float16:
+		return convert(t, consts.Float32).Div(t2)
+	case consts.Float32:
+		return t.div(t2.(*Float32))
+	default:
+		panic(ErrNotSupported)
+	}
+}
+
+func (t *Float32) div(t2 *Float32) gomath.Tensor {
+	size1, d1 := splitSize1(t)
+	size2, d2 := splitSize1(t2)
+	if len(size1) == 0 {
+		if d1 == 1 {
+			// 1 / scalar * t2
+			return t.mulScalar(t2, 1/t.data[0])
+		} else {
+			// vector / t2
+			return t.divVector(t2, t.data, count(size2))
+		}
+	}
+	if len(size2) == 0 {
+		if d2 == 1 {
+			// t * 1 / scalar
+			return t.mulScalar(t, 1/t2.data[0])
+		} else {
+			// t / vector
+			return t.divVector(t, t2.data, count(size1))
+		}
+	}
+	if d1 != d2 {
+		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
+	}
+	if !sizeMatch(size1, size2) {
+		panic(ErrBroadcast)
+	}
+	head := count(size1)
+	data := make([]float32, head*d1)
+	parallel(head*d1, int64(runtime.NumCPU()), func(_, offset, size int64) {
+		t.impl.FP32DivVector(
+			t.data[offset:offset+size],
+			t2.data[offset:offset+size],
+			data[offset:offset+size])
+	})
+	return NewFloat32(data, append(size1, d1),
+		gomath.WithDevice(t.Device()))
+}
+
+func (*Float32) divVector(t *Float32, vector []float32, counts int64) gomath.Tensor {
+	data := make([]float32, len(t.data))
+	n := int64(len(vector))
+	parallel(counts, int64(runtime.NumCPU()), func(_, offset, size int64) {
+		for i := offset; i < offset+size; i++ {
+			offset := i * n
+			t.impl.FP32DivVector(t.data[offset:offset+n], vector, data[offset:offset+n])
+		}
+	})
+	return NewFloat32(data, t.Size(),
+		gomath.WithDevice(t.Device()))
 }

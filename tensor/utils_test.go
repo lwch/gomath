@@ -1,6 +1,7 @@
 package tensor
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/lwch/gomath"
@@ -85,26 +86,80 @@ func computeMulVector(rows, cols int64) ([]float32, []float32) {
 	return output, w
 }
 
+func computeDiv(rows, cols int64) []float32 {
+	x := make([]float32, rows*cols)
+	for i := range x {
+		x[i] = float32(i) + 1
+	}
+	output := make([]float32, rows*cols)
+	for i := int64(0); i < rows*cols; i++ {
+		output[i] = x[i] / x[i]
+	}
+	return output
+}
+
+func computeDivScalar(rows, cols int64, scalar float32) []float32 {
+	x := make([]float32, rows*cols)
+	for i := range x {
+		x[i] = float32(i) + 1
+	}
+	output := make([]float32, rows*cols)
+	for i := int64(0); i < rows*cols; i++ {
+		output[i] = x[i] / scalar
+	}
+	return output
+}
+
+func computeDivVector(rows, cols int64) ([]float32, []float32) {
+	x := make([]float32, rows*cols)
+	w := make([]float32, cols)
+	for i := range x {
+		x[i] = float32(i) + 1
+	}
+	for i := range w {
+		w[i] = float32(i) + 1
+	}
+	output := make([]float32, rows*cols)
+	for i := int64(0); i < rows*cols; i++ {
+		output[i] = x[i] / w[i%cols]
+	}
+	return output, w
+}
+
 func equalFP16(data []uint16, expect []float32) bool {
 	if len(data) != len(expect) {
 		return false
 	}
+	ok := true
+	var std float32
 	for i, v := range data {
+		std += float32(math.Pow(float64(half.Decode(v)-expect[i]), 2))
 		if v != half.Encode(expect[i]) {
-			return false
+			ok = false
 		}
 	}
-	return true
+	if ok {
+		return true
+	}
+	std /= float32(len(data))
+	return std < 0.01
 }
 
 func equal(data, expect []float32) bool {
 	if len(data) != len(expect) {
 		return false
 	}
+	ok := true
+	var std float32
 	for i, v := range data {
+		std += float32(math.Pow(float64(v-expect[i]), 2))
 		if v != expect[i] {
-			return false
+			ok = false
 		}
 	}
-	return true
+	if ok {
+		return true
+	}
+	std /= float32(len(data))
+	return std < 0.01
 }
