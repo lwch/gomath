@@ -8,7 +8,7 @@ import (
 )
 
 func getRows() int64 {
-	return rand.Int63n(8)
+	return rand.Int63n(7) + 1
 }
 
 func getCols() int64 {
