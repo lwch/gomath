@@ -1,7 +1,7 @@
 #include "tensor.h"
-#include "../info.h"
-#include "fp16.h"
-#include "fp32.h"
+#include "../../../info.h"
+#include "fp16/fp16.h"
+#include "fp32/fp32.h"
 
 size_t bs;
 

@@ -4,15 +4,7 @@ import (
 	"sync"
 
 	"github.com/lwch/gomath"
-	"github.com/lwch/gomath/consts"
 )
-
-func computeInC(t consts.Type) bool {
-	if debug {
-		return false
-	}
-	return cCompute
-}
 
 func splitSize1(t gomath.Tensor) ([]int64, int64) {
 	size := t.Size()
@@ -62,12 +54,4 @@ func parallel(size, batches int64, fn func(batch, offset, size int64)) {
 		}(i, offset, step)
 	}
 	wg.Wait()
-}
-
-func dotVector[T float32](x, w []T, d int64) T {
-	var ret T
-	for i := int64(0); i < d; i++ {
-		ret += x[i] * w[i]
-	}
-	return ret
 }

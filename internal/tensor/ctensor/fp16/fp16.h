@@ -1,5 +1,5 @@
-#ifndef __TENSOR_FP16_H__
-#define __TENSOR_FP16_H__
+#ifndef __CTENSOR_FP16_H__
+#define __CTENSOR_FP16_H__
 
 #ifdef __cplusplus
 extern "C" {

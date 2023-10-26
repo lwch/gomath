@@ -1,8 +1,8 @@
-#include "../info.h"
-#include "exception.hpp"
+#include "../../../../info.h"
+#include "../exception.hpp"
+#include "../tensor.h"
+#include "common.hpp"
 #include "fp32.h"
-#include "fp32_common.hpp"
-#include "tensor.h"
 #include <exception>
 #include <stdio.h>
 

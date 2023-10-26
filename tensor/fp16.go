@@ -1,22 +1,21 @@
 package tensor
 
-// #include "fp16.h"
-import "C"
-
 import (
 	"fmt"
 	"runtime"
-	"unsafe"
 
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/consts"
 	"github.com/lwch/gomath/internal/half"
 	"github.com/lwch/gomath/internal/tensor"
+	"github.com/lwch/gomath/internal/tensor/ctensor"
+	"github.com/lwch/gomath/internal/tensor/gotensor"
 )
 
 type Float16 struct {
 	*tensor.Tensor
 	data []uint16
+	impl tensor.TensorImpl
 }
 
 var _ gomath.Tensor = &Float16{}
@@ -32,6 +31,15 @@ func NewFloat16(data []float32, shape []int64, opts ...tensor.Option) *Float16 {
 	ret.data = make([]uint16, len(data))
 	for i, v := range data {
 		ret.data[i] = half.Encode(v)
+	}
+	if debug {
+		ret.impl = gotensor.New()
+	} else {
+		var ok bool
+		ret.impl, ok = ctensor.New()
+		if !ok {
+			ret.impl = gotensor.New()
+		}
 	}
 	return &ret
 }
@@ -88,38 +96,14 @@ func (t *Float16) mul(t2 *Float16) gomath.Tensor {
 	if head == 0 {
 		head = 1
 	}
-	if computeInC(consts.Float32) {
-		return t.cMul(t2, size1, head, d1)
-	}
-	return t.goMul(t2, size2, head, d1)
-}
-
-func (t *Float16) cMul(t2 *Float16, size []int64, head, d int64) gomath.Tensor {
-	data := make([]uint16, head*d)
-	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
-	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
-	p3 := unsafe.Pointer(unsafe.SliceData(data))
-	parallel(head*d, int64(runtime.NumCPU()), func(_, offset, size int64) {
-		C.fp16_mul_vector(
-			(*C.uint16_t)(unsafe.Add(p1, uintptr(offset*2))),
-			(*C.uint16_t)(unsafe.Add(p2, uintptr(offset*2))),
-			(*C.uint16_t)(unsafe.Add(p3, uintptr(offset*2))),
-			C.int64_t(size))
+	data := make([]uint16, head*d1)
+	parallel(head*d1, int64(runtime.NumCPU()), func(_, offset, size int64) {
+		t.impl.FP16Mul(
+			t.data[offset:offset+size],
+			t2.data[offset:offset+size],
+			data[offset:offset+size])
 	})
-	return NewFloat16Raw(data, append(size, d),
-		gomath.WithDevice(t.Device()))
-}
-
-func (t *Float16) goMul(t2 *Float16, size []int64, head, d int64) gomath.Tensor {
-	data := make([]uint16, head*d)
-	core := int64(runtime.NumCPU())
-	parallel(head*d, core, func(_, offset, size int64) {
-		end := offset + size
-		for ; offset < end; offset++ {
-			data[offset] = half.Encode(half.Decode(t.data[offset]) * half.Decode(t2.data[offset]))
-		}
-	})
-	return NewFloat16Raw(data, append(size, d),
+	return NewFloat16Raw(data, append(size1, d1),
 		gomath.WithDevice(t.Device()))
 }
 
@@ -151,66 +135,28 @@ func (t *Float16) matMul(t2 *Float16) gomath.Tensor {
 	if head == 0 {
 		head = 1
 	}
-	if computeInC(consts.Float32) {
-		return t.cMatMul(t2, size1, head, m, n, d1)
-	}
-	return t.goMatMul(t2, size1, head, m, n, d1)
-}
-
-func (t *Float16) cMatMul(t2 *Float16, size []int64, head, m, n, d int64) gomath.Tensor {
 	data := make([]uint16, head*m*n)
-	p1 := unsafe.Pointer(unsafe.SliceData(t.data))
-	p2 := unsafe.Pointer(unsafe.SliceData(t2.data))
 	core := runtime.NumCPU()
 	parallel(head, int64(core), func(_, offset, size int64) {
 		for block := offset; block < offset+size; block++ {
-			offset1 := block * m * d
-			offset2 := block * n * d
+			offset1 := block * m * d1
+			offset2 := block * n * d1
 			idx := block * m * n
 			parallel(m, int64(core), func(_, offset, size int64) {
 				for rows := offset; rows < offset+size; rows++ {
-					offset1 := offset1 + rows*d
+					offset1 := offset1 + rows*d1
 					idx := idx + rows*n
 					for cols := int64(0); cols < n; cols++ {
-						offset2 := offset2 + cols*d
-						data[idx+cols] = uint16(C.fp16_dot_vector(
-							(*C.uint16_t)(unsafe.Add(p1, uintptr(offset1*2))),
-							(*C.uint16_t)(unsafe.Add(p2, uintptr(offset2*2))),
-							C.int64_t(d)))
+						offset2 := offset2 + cols*d1
+						data[idx+cols] = t.impl.FP16DotVector(
+							t.data[offset1:offset1+d1],
+							t2.data[offset2:offset2+d1])
 					}
 				}
 			})
 		}
 	})
-	return NewFloat16Raw(data, append(size, m, n),
-		gomath.WithDevice(t.Device()))
-}
-
-func (t *Float16) goMatMul(t2 *Float16, size []int64, head, m, n, d int64) gomath.Tensor {
-	data := make([]uint16, head*m*n)
-	core := int64(runtime.NumCPU())
-	parallel(head, core, func(_, offset, size int64) {
-		for block := offset; block < offset+size; block++ {
-			offset1 := block * m * d
-			offset2 := block * n * d
-			idx := block * m * n
-			parallel(m, core, func(_, offset, size int64) {
-				data1 := make([]float32, d)
-				data2 := make([]float32, d)
-				for rows := offset; rows < offset+size; rows++ {
-					offset1 := offset1 + rows*d
-					idx := idx + rows*n
-					for cols := int64(0); cols < n; cols++ {
-						offset2 := offset2 + cols*d
-						half.DecodeArray(t.data[offset1:offset1+d], data1)
-						half.DecodeArray(t2.data[offset2:offset2+d], data2)
-						data[idx+cols] = half.Encode(dotVector(data1, data2, d))
-					}
-				}
-			})
-		}
-	})
-	return NewFloat16Raw(data, append(size, m, n),
+	return NewFloat16Raw(data, append(size1, m, n),
 		gomath.WithDevice(t.Device()))
 }
 

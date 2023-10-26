@@ -1,5 +1,5 @@
-#ifndef __TENSOR_FP16_COMMON_HPP__
-#define __TENSOR_FP16_COMMON_HPP__
+#ifndef __CTENSOR_FP16_COMMON_HPP__
+#define __CTENSOR_FP16_COMMON_HPP__
 
 #if !(defined(__APPLE__) && defined(__arm64__))
 

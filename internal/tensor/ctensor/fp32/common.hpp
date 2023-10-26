@@ -101,11 +101,11 @@ template <typename T> void _fp32_store_ps(float *y, const T &x) {
 }
 
 template <> inline void _fp32_store_ps(float *y, const __m256 &x) {
-  _mm256_store_ps(y, x);
+  _mm256_storeu_ps(y, x);
 }
 
 template <> inline void _fp32_store_ps(float *y, const __m512 &x) {
-  _mm512_store_ps(y, x);
+  _mm512_storeu_ps(y, x);
 }
 
 #endif

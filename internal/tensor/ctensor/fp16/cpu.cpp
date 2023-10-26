@@ -1,9 +1,9 @@
-#include "../info.h"
-#include "../internal/half/half.hpp"
-#include "exception.hpp"
+#include "../../../../info.h"
+#include "../../../half/half.hpp"
+#include "../exception.hpp"
+#include "../tensor.h"
+#include "common.hpp"
 #include "fp16.h"
-#include "fp16_common.hpp"
-#include "tensor.h"
 #include <exception>
 #include <stdio.h>
 

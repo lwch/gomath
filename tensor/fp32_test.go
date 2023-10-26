@@ -88,3 +88,43 @@ func BenchmarkFP32MatMulGoNum(b *testing.B) {
 		fp32GoNumMatMul(64, 4096)
 	}
 }
+
+func TestFP32Mul(t *testing.T) {
+	debug = false
+	rows := getRows()
+	cols := getCols()
+	expect := computeMul(rows, cols)
+	x := buildFP32(rows, cols)
+	result := x.Mul(x).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func TestFP32MulGo(t *testing.T) {
+	debug = true
+	rows := getRows()
+	cols := getCols()
+	expect := computeMul(rows, cols)
+	x := buildFP32(rows, cols)
+	result := x.Mul(x).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func BenchmarkFP32Mul(b *testing.B) {
+	debug = false
+	x := buildFP32(64, 4096)
+	for i := 0; i < b.N; i++ {
+		x.Mul(x)
+	}
+}
+
+func BenchmarkFP32MulGo(b *testing.B) {
+	debug = true
+	x := buildFP32(64, 4096)
+	for i := 0; i < b.N; i++ {
+		x.Mul(x)
+	}
+}
