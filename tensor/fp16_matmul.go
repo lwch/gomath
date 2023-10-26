@@ -29,9 +29,6 @@ func (t *Float16) matMul(t2 *Float16) gomath.Tensor {
 		panic(ErrBroadcast)
 	}
 	head := count(size1)
-	if head == 0 {
-		head = 1
-	}
 	data := make([]uint16, head*m*n)
 	core := runtime.NumCPU()
 	parallel(head, int64(core), func(_, offset, size int64) {

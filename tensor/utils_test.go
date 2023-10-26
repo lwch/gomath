@@ -69,7 +69,23 @@ func computeMulScalar(rows, cols int64, scalar float32) []float32 {
 	return output
 }
 
-func equalF16(data []uint16, expect []float32) bool {
+func computeMulVector(rows, cols int64) ([]float32, []float32) {
+	x := make([]float32, rows*cols)
+	w := make([]float32, cols)
+	for i := range x {
+		x[i] = float32(i) + 1
+	}
+	for i := range w {
+		w[i] = float32(i) + 1
+	}
+	output := make([]float32, rows*cols)
+	for i := int64(0); i < rows*cols; i++ {
+		output[i] = x[i] * w[i%cols]
+	}
+	return output, w
+}
+
+func equalFP16(data []uint16, expect []float32) bool {
 	if len(data) != len(expect) {
 		return false
 	}
@@ -81,12 +97,12 @@ func equalF16(data []uint16, expect []float32) bool {
 	return true
 }
 
-func equal[T float32](data []T, expect []float32) bool {
+func equal(data, expect []float32) bool {
 	if len(data) != len(expect) {
 		return false
 	}
 	for i, v := range data {
-		if v != T(expect[i]) {
+		if v != expect[i] {
 			return false
 		}
 	}

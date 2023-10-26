@@ -13,7 +13,7 @@ func TestFP16Mul(t *testing.T) {
 	expect := computeMul(rows, cols)
 	x := buildFP16(rows, cols)
 	result := x.Mul(x).(*Float16).data
-	if !equalF16(result, expect) {
+	if !equalFP16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
@@ -27,7 +27,7 @@ func TestFP16MulGo(t *testing.T) {
 	expect := computeMul(rows, cols)
 	x := buildFP16(rows, cols)
 	result := x.Mul(x).(*Float16).data
-	if !equalF16(result, expect) {
+	if !equalFP16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
@@ -58,7 +58,7 @@ func TestFP16MulScalar(t *testing.T) {
 	expect := computeMulScalar(rows, cols, scalar)
 	x := buildFP16(rows, cols)
 	result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).(*Float16).data
-	if !equalF16(result, expect) {
+	if !equalFP16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
@@ -73,7 +73,7 @@ func TestFP16MulScalarGo(t *testing.T) {
 	expect := computeMulScalar(rows, cols, scalar)
 	x := buildFP16(rows, cols)
 	result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).(*Float16).data
-	if !equalF16(result, expect) {
+	if !equalFP16(result, expect) {
 		tmp := make([]float32, len(result))
 		half.DecodeArray(result, tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
@@ -95,6 +95,54 @@ func BenchmarkFP16MulScalarGo(b *testing.B) {
 	scalar := getScalar()
 	x := buildFP16(64, 4096)
 	w := NewFloat16([]float32{scalar}, []int64{1})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}
+
+func TestFP16MulVector(t *testing.T) {
+	debug = false
+	rows := getRows()
+	cols := getCols()
+	expect, vec := computeMulVector(rows, cols)
+	x := buildFP16(rows, cols)
+	result := x.Mul(NewFloat16(vec, []int64{cols})).(*Float16).data
+	if !equalFP16(result, expect) {
+		tmp := make([]float32, len(result))
+		half.DecodeArray(result, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+	}
+}
+
+func TestFP16MulVectorGo(t *testing.T) {
+	debug = true
+	rows := getRows()
+	cols := getCols()
+	expect, vec := computeMulVector(rows, cols)
+	x := buildFP16(rows, cols)
+	result := x.Mul(NewFloat16(vec, []int64{cols})).(*Float16).data
+	if !equalFP16(result, expect) {
+		tmp := make([]float32, len(result))
+		half.DecodeArray(result, tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+	}
+}
+
+func BenchmarkFP16MulVector(b *testing.B) {
+	debug = false
+	_, vec := computeMulVector(64, 4096)
+	x := buildFP16(64, 4096)
+	w := NewFloat16(vec, []int64{4096})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}
+
+func BenchmarkFP16MulVectorGo(b *testing.B) {
+	debug = true
+	_, vec := computeMulVector(64, 4096)
+	x := buildFP16(64, 4096)
+	w := NewFloat16(vec, []int64{4096})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
 	}

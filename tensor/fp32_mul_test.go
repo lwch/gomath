@@ -1,6 +1,8 @@
 package tensor
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestFP32Mul(t *testing.T) {
 	debug = false
@@ -83,6 +85,50 @@ func BenchmarkFP32MulScalarGo(b *testing.B) {
 	scalar := getScalar()
 	x := buildFP32(64, 4096)
 	w := NewFloat32([]float32{scalar}, []int64{1})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}
+
+func TestFP32MulVector(t *testing.T) {
+	debug = false
+	rows := getRows()
+	cols := getCols()
+	expect, vec := computeMulVector(rows, cols)
+	x := buildFP32(rows, cols)
+	result := x.Mul(NewFloat32(vec, []int64{cols})).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func TestFP32MulVectorGo(t *testing.T) {
+	debug = true
+	rows := getRows()
+	cols := getCols()
+	expect, vec := computeMulVector(rows, cols)
+	x := buildFP32(rows, cols)
+	result := x.Mul(NewFloat32(vec, []int64{cols})).(*Float32).data
+	if !equal(result, expect) {
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+	}
+}
+
+func BenchmarkFP32MulVector(b *testing.B) {
+	debug = false
+	_, vec := computeMulVector(64, 4096)
+	x := buildFP32(64, 4096)
+	w := NewFloat32(vec, []int64{4096})
+	for i := 0; i < b.N; i++ {
+		x.Mul(w)
+	}
+}
+
+func BenchmarkFP32MulVectorGo(b *testing.B) {
+	debug = true
+	_, vec := computeMulVector(64, 4096)
+	x := buildFP32(64, 4096)
+	w := NewFloat32(vec, []int64{4096})
 	for i := 0; i < b.N; i++ {
 		x.Mul(w)
 	}

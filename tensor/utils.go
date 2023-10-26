@@ -17,11 +17,8 @@ func splitSize2(t gomath.Tensor) ([]int64, int64, int64) {
 }
 
 func count(size []int64) int64 {
-	if len(size) == 0 {
-		return 0
-	}
-	ret := size[0]
-	for i := 1; i < len(size); i++ {
+	ret := int64(1)
+	for i := 0; i < len(size); i++ {
 		ret *= size[i]
 	}
 	return ret
@@ -42,12 +39,15 @@ func sizeMatch(a, b []int64) bool {
 func parallel(size, batches int64, fn func(batch, offset, size int64)) {
 	step := size / batches
 	var wg sync.WaitGroup
-	wg.Add(int(batches))
 	for i := int64(0); i < batches; i++ {
 		offset := i * step
 		if i == batches-1 {
 			step = size - offset
 		}
+		if step == 0 {
+			continue
+		}
+		wg.Add(1)
 		go func(i, offset, step int64) {
 			defer wg.Done()
 			fn(i, offset, step)

@@ -22,13 +22,23 @@ func (t *Float16) Mul(t2 gomath.Tensor) gomath.Tensor {
 func (t *Float16) mul(t2 *Float16) gomath.Tensor {
 	size1, d1 := splitSize1(t)
 	size2, d2 := splitSize1(t2)
-	if len(size1) == 0 && d1 == 1 {
-		// scalar * t2
-		return t.mulScalar(t2, t.data[0])
+	if len(size1) == 0 {
+		if d1 == 1 {
+			// scalar * t2
+			return t.mulScalar(t2, t.data[0])
+		} else {
+			// vector * t2
+			return t.mulVector(t2, t.data, count(size2))
+		}
 	}
-	if len(size2) == 0 && d2 == 1 {
-		// t * scalar
-		return t.mulScalar(t, t2.data[0])
+	if len(size2) == 0 {
+		if d2 == 1 {
+			// t * scalar
+			return t.mulScalar(t, t2.data[0])
+		} else {
+			// t * vector
+			return t.mulVector(t, t2.data, count(size1))
+		}
 	}
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
@@ -37,9 +47,6 @@ func (t *Float16) mul(t2 *Float16) gomath.Tensor {
 		panic(ErrBroadcast)
 	}
 	head := count(size1)
-	if head == 0 {
-		head = 1
-	}
 	data := make([]uint16, head*d1)
 	parallel(head*d1, int64(runtime.NumCPU()), func(_, offset, size int64) {
 		t.impl.FP16Mul(
@@ -55,6 +62,19 @@ func (*Float16) mulScalar(t *Float16, scalar uint16) gomath.Tensor {
 	data := make([]uint16, len(t.data))
 	parallel(int64(len(t.data)), int64(runtime.NumCPU()), func(_, offset, size int64) {
 		t.impl.FP16MulScalar(t.data[offset:offset+size], scalar, data[offset:offset+size])
+	})
+	return NewFloat16Raw(data, t.Size(),
+		gomath.WithDevice(t.Device()))
+}
+
+func (*Float16) mulVector(t *Float16, vector []uint16, counts int64) gomath.Tensor {
+	data := make([]uint16, len(t.data))
+	n := int64(len(vector))
+	parallel(counts, int64(runtime.NumCPU()), func(_, offset, size int64) {
+		for i := offset; i < offset+size; i++ {
+			offset := i * n
+			t.impl.FP16Mul(t.data[offset:offset+n], vector, data[offset:offset+n])
+		}
 	})
 	return NewFloat16Raw(data, t.Size(),
 		gomath.WithDevice(t.Device()))
