@@ -3,6 +3,7 @@ package tensor
 import (
 	"math"
 	"math/rand"
+	"testing"
 
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/internal/half"
@@ -170,4 +171,51 @@ func useGoTensor(fn func()) {
 	impl = gotensor.New()
 	fn()
 	impl = old
+}
+
+func testMatMul(t *testing.T, build func(int64, int64) gomath.Tensor) {
+	rows := getRows()
+	cols := getCols()
+	expect := computeMatMul(rows, cols)
+	x := build(rows, cols)
+	result := x.MatMul(x).Storage()
+	if !equal(result, expect) {
+		tmp := make([]float32, result.Size())
+		half.DecodeArray(result.Data().([]uint16), tmp)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+	}
+}
+
+func testMul(t *testing.T,
+	buildMatrix func(int64, int64) gomath.Tensor,
+	buildScalar func(n float32) gomath.Tensor) {
+	rows := getRows()
+	cols := getCols()
+	compare := func(result gomath.Storage, expect []float32) {
+		if !equal(result, expect) {
+			switch data := result.Data().(type) {
+			case []uint16:
+				tmp := make([]float32, result.Size())
+				half.DecodeArray(data, tmp)
+				t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+			case []float32:
+				t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, data)
+			}
+		}
+	}
+	// matrix * matrix
+	expect := computeMul(rows, cols)
+	x := buildMatrix(rows, cols)
+	result := x.Mul(x).Storage()
+	compare(result, expect)
+	// scalar * matrix
+	scalar := getScalar()
+	expect = computeMulScalar(rows, cols, scalar)
+	result = buildScalar(scalar).Mul(x).Storage()
+	compare(result, expect)
+	// matrix * scalar
+	scalar = getScalar()
+	expect = computeMulScalar(rows, cols, scalar)
+	result = x.Mul(buildScalar(scalar)).Storage()
+	compare(result, expect)
 }

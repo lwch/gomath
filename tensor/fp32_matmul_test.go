@@ -18,14 +18,7 @@ func buildFP32(rows, cols int64) gomath.Tensor {
 
 func TestFP32MatMul(t *testing.T) {
 	useCTensor(func() {
-		rows := getRows()
-		cols := getCols()
-		expect := computeMatMul(rows, cols)
-		x := buildFP32(rows, cols)
-		result := x.MatMul(x).Storage()
-		if !equal(result, expect) {
-			t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
-		}
+		testMatMul(t, buildFP32)
 	})
 }
 
@@ -40,14 +33,7 @@ func BenchmarkFP32MatMul(b *testing.B) {
 
 func TestFP32MatMulGo(t *testing.T) {
 	useGoTensor(func() {
-		rows := getRows()
-		cols := getCols()
-		expect := computeMatMul(rows, cols)
-		x := buildFP32(rows, cols)
-		result := x.MatMul(x).Storage()
-		if !equal(result, expect) {
-			t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
-		}
+		testMatMul(t, buildFP32)
 	})
 }
 
