@@ -14,6 +14,8 @@ public:
                           int64_t d) = 0;
   virtual void mul_scalar(const float *x, const float w, float *y,
                           int64_t d) = 0;
+  virtual void scalar_div_vector(const float x, const float *w, float *y,
+                                 int64_t d) = 0;
   virtual void div_vector(const float *x, const float *w, float *y,
                           int64_t d) = 0;
 };

@@ -29,6 +29,15 @@ func (*CTensor) FP32MulScalar(x []float32, w float32, y []float32) {
 	)
 }
 
+func (*CTensor) FP32ScalarDivVector(x float32, w, y []float32) {
+	C.fp32_scalar_div_vector(
+		C.float(x),
+		(*C.float)(&w[0]),
+		(*C.float)(&y[0]),
+		C.int64_t(len(w)),
+	)
+}
+
 func (*CTensor) FP32DivVector(x, w, y []float32) {
 	C.fp32_div_vector(
 		(*C.float)(&x[0]),

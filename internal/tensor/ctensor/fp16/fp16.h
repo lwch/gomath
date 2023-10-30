@@ -12,7 +12,10 @@ bool fp16_init();
 uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d);
 void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d);
-void fp16_mul_scalar(const uint16_t *x, uint16_t w, uint16_t *y, int64_t d);
+void fp16_mul_scalar(const uint16_t *x, const uint16_t w, uint16_t *y,
+                     int64_t d);
+void fp16_scalar_div_vector(const uint16_t x, const uint16_t *w, uint16_t *y,
+                            int64_t d);
 void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d);
 

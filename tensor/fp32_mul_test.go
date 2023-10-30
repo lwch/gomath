@@ -10,9 +10,9 @@ func TestFP32Mul(t *testing.T) {
 	cols := getCols()
 	expect := computeMul(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Mul(x).(*Float32).data
+	result := x.Mul(x).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -22,9 +22,9 @@ func TestFP32MulGo(t *testing.T) {
 	cols := getCols()
 	expect := computeMul(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Mul(x).(*Float32).data
+	result := x.Mul(x).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -51,9 +51,9 @@ func TestFP32MulScalar(t *testing.T) {
 	cols := getCols()
 	expect := computeMulScalar(rows, cols, scalar)
 	x := buildFP32(rows, cols)
-	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -64,9 +64,9 @@ func TestFP32MulScalarGo(t *testing.T) {
 	cols := getCols()
 	expect := computeMulScalar(rows, cols, scalar)
 	x := buildFP32(rows, cols)
-	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	result := x.Mul(NewFloat32([]float32{scalar}, []int64{1})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -96,9 +96,9 @@ func TestFP32MulVector(t *testing.T) {
 	cols := getCols()
 	expect, vec := computeMulVector(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Mul(NewFloat32(vec, []int64{cols})).(*Float32).data
+	result := x.Mul(NewFloat32(vec, []int64{cols})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -108,9 +108,9 @@ func TestFP32MulVectorGo(t *testing.T) {
 	cols := getCols()
 	expect, vec := computeMulVector(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Mul(NewFloat32(vec, []int64{cols})).(*Float32).data
+	result := x.Mul(NewFloat32(vec, []int64{cols})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -140,9 +140,9 @@ func TestFP32Div(t *testing.T) {
 	cols := getCols()
 	expect := computeDiv(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Div(x).(*Float32).data
+	result := x.Div(x).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -152,9 +152,9 @@ func TestFP32DivGo(t *testing.T) {
 	cols := getCols()
 	expect := computeDiv(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Div(x).(*Float32).data
+	result := x.Div(x).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -181,9 +181,9 @@ func TestFP32DivScalar(t *testing.T) {
 	cols := getCols()
 	expect := computeDivScalar(rows, cols, scalar)
 	x := buildFP32(rows, cols)
-	result := x.Div(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	result := x.Div(NewFloat32([]float32{scalar}, []int64{1})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -194,9 +194,9 @@ func TestFP32DivScalarGo(t *testing.T) {
 	cols := getCols()
 	expect := computeDivScalar(rows, cols, scalar)
 	x := buildFP32(rows, cols)
-	result := x.Div(NewFloat32([]float32{scalar}, []int64{1})).(*Float32).data
+	result := x.Div(NewFloat32([]float32{scalar}, []int64{1})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -226,9 +226,9 @@ func TestFP32DivVector(t *testing.T) {
 	cols := getCols()
 	expect, vec := computeDivVector(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Div(NewFloat32(vec, []int64{cols})).(*Float32).data
+	result := x.Div(NewFloat32(vec, []int64{cols})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 
@@ -238,9 +238,9 @@ func TestFP32DivVectorGo(t *testing.T) {
 	cols := getCols()
 	expect, vec := computeDivVector(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.Div(NewFloat32(vec, []int64{cols})).(*Float32).data
+	result := x.Div(NewFloat32(vec, []int64{cols})).Storage()
 	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result)
+		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, result.Data())
 	}
 }
 

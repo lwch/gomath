@@ -25,6 +25,13 @@ func (*GoTensor) FP16MulScalar(x []uint16, w uint16, y []uint16) {
 	}
 }
 
+func (*GoTensor) FP16ScalarDivVector(x uint16, w, y []uint16) {
+	dx := half.Decode(x)
+	for i := range w {
+		y[i] = half.Encode(dx / half.Decode(w[i]))
+	}
+}
+
 func (*GoTensor) FP16DivVector(x, w, y []uint16) {
 	for i := range x {
 		y[i] = half.Encode(half.Decode(x[i]) / half.Decode(w[i]))

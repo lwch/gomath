@@ -5,7 +5,9 @@
 bool fp32_init() { return false; }
 float fp32_dot_vector(const float *, const float *, int64_t) { return 0; }
 void fp32_mul_vector(const float *, const float *, float *, int64_t) {}
-void fp32_mul_scalar(const float *, float, float *, int64_t) {}
+void fp32_mul_scalar(const float *, const float, float *, int64_t) {}
+void fp32_scalar_div_vector(const float x, const float *w, float *y,
+                            int64_t d) {}
 void fp32_div_vector(const float *, const float *, float *, int64_t) {}
 
 #endif

@@ -129,40 +129,63 @@ func computeDivVector(rows, cols int64) ([]float32, []float32) {
 	return output, w
 }
 
-func equalFP16(data []uint16, expect []float32) bool {
-	if len(data) != len(expect) {
-		return false
-	}
-	ok := true
-	var std float32
-	for i, v := range data {
-		std += float32(math.Pow(float64(half.Decode(v)-expect[i]), 2))
-		if v != half.Encode(expect[i]) {
-			ok = false
-		}
-	}
-	if ok {
-		return true
-	}
-	std /= float32(len(data))
-	return std < 0.01
-}
+// func equalFP16(data []uint16, expect []float32) bool {
+// 	if len(data) != len(expect) {
+// 		return false
+// 	}
+// 	ok := true
+// 	var std float32
+// 	for i, v := range data {
+// 		std += float32(math.Pow(float64(half.Decode(v)-expect[i]), 2))
+// 		if v != half.Encode(expect[i]) {
+// 			ok = false
+// 		}
+// 	}
+// 	if ok {
+// 		return true
+// 	}
+// 	std /= float32(len(data))
+// 	return std < 0.01
+// }
 
-func equal(data, expect []float32) bool {
-	if len(data) != len(expect) {
+// func equal(data, expect []float32) bool {
+// 	if len(data) != len(expect) {
+// 		return false
+// 	}
+// 	ok := true
+// 	var std float32
+// 	for i, v := range data {
+// 		std += float32(math.Pow(float64(v-expect[i]), 2))
+// 		if v != expect[i] {
+// 			ok = false
+// 		}
+// 	}
+// 	if ok {
+// 		return true
+// 	}
+// 	std /= float32(len(data))
+// 	return std < 0.01
+// }
+
+func equal(data gomath.Storage, expect []float32) bool {
+	if data.Size() != len(expect) {
 		return false
 	}
 	ok := true
 	var std float32
-	for i, v := range data {
+	data.Range(func(i int, a any) {
+		v, ok := a.(float32)
+		if !ok {
+			v = half.Decode(a.(uint16))
+		}
 		std += float32(math.Pow(float64(v-expect[i]), 2))
 		if v != expect[i] {
 			ok = false
 		}
-	}
+	})
 	if ok {
 		return true
 	}
-	std /= float32(len(data))
+	std /= float32(data.Size())
 	return std < 0.01
 }

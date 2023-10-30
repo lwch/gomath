@@ -22,7 +22,7 @@ func TestFP32MatMul(t *testing.T) {
 	cols := getCols()
 	expect := computeMatMul(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.MatMul(x).(*Float32).data
+	result := x.MatMul(x).Storage()
 	if !equal(result, expect) {
 		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
 	}
@@ -42,7 +42,7 @@ func TestFP32MatMulGo(t *testing.T) {
 	cols := getCols()
 	expect := computeMatMul(rows, cols)
 	x := buildFP32(rows, cols)
-	result := x.MatMul(x).(*Float32).data
+	result := x.MatMul(x).Storage()
 	if !equal(result, expect) {
 		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
 	}
@@ -56,23 +56,7 @@ func BenchmarkFP32MatMulGo(b *testing.B) {
 	}
 }
 
-func fp32GoNumMatMul(rows, cols int64) gomath.Tensor {
-	data := make([]float32, rows*cols)
-	for i := range data {
-		data[i] = float32(i) + 1
-	}
-	x := blas32.General{
-		Rows:   int(rows),
-		Cols:   int(cols),
-		Stride: int(cols),
-		Data:   data,
-	}
-	y := blas32.General{
-		Rows:   int(rows),
-		Cols:   int(cols),
-		Stride: int(cols),
-		Data:   data,
-	}
+func fp32GoNumMatMul(x, y blas32.General, rows, cols int64) blas32.General {
 	z := blas32.General{
 		Rows:   int(rows),
 		Cols:   int(rows),
@@ -80,11 +64,20 @@ func fp32GoNumMatMul(rows, cols int64) gomath.Tensor {
 		Data:   make([]float32, rows*rows),
 	}
 	blas32.Gemm(blas.NoTrans, blas.Trans, 1, x, y, 0, z)
-	return NewFloat32(z.Data, []int64{rows, rows})
+	return z
 }
 
 func BenchmarkFP32MatMulGoNum(b *testing.B) {
+	x := blas32.General{
+		Rows:   benchmarkRows,
+		Cols:   benchmarkCols,
+		Stride: benchmarkCols,
+		Data:   make([]float32, benchmarkRows*benchmarkCols),
+	}
+	for i := range x.Data {
+		x.Data[i] = float32(i) + 1
+	}
 	for i := 0; i < b.N; i++ {
-		fp32GoNumMatMul(benchmarkRows, benchmarkCols)
+		fp32GoNumMatMul(x, x, benchmarkRows, benchmarkCols)
 	}
 }

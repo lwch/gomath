@@ -44,7 +44,7 @@ public:
     }
   }
 
-  virtual void mul_scalar(const float *x, float w, float *y, int64_t d) {
+  virtual void mul_scalar(const float *x, const float w, float *y, int64_t d) {
     size_t np = (d & ~(bs - 1));
     T w_vec = _fp32_set1_ps<T>(w);
     for (size_t i = 0; i < np; i += bs) {
@@ -56,6 +56,22 @@ public:
     }
     for (size_t i = 0; i < d - np; i++) {
       y[i] = x[i] * w;
+    }
+  }
+
+  virtual void scalar_div_vector(const float x, const float *w, float *y,
+                                 int64_t d) {
+    size_t np = (d & ~(bs - 1));
+    T x_vec = _fp32_set1_ps<T>(x);
+    for (size_t i = 0; i < np; i += bs) {
+      T w_vec = _fp32_loadu<T>(w);
+      T y_vec = _fp32_div_ps<T>(x_vec, w_vec);
+      _fp32_store_ps(y, y_vec);
+      w += bs;
+      y += bs;
+    }
+    for (size_t i = 0; i < d - np; i++) {
+      y[i] = x / w[i];
     }
   }
 
@@ -97,8 +113,13 @@ void fp32_mul_vector(const float *x, const float *w, float *y, int64_t d) {
   _fp32->mul_vector(x, w, y, d);
 }
 
-void fp32_mul_scalar(const float *x, float w, float *y, int64_t d) {
+void fp32_mul_scalar(const float *x, const float w, float *y, int64_t d) {
   _fp32->mul_scalar(x, w, y, d);
+}
+
+void fp32_scalar_div_vector(const float x, const float *w, float *y,
+                            int64_t d) {
+  _fp32->scalar_div_vector(x, w, y, d);
 }
 
 void fp32_div_vector(const float *x, const float *w, float *y, int64_t d) {

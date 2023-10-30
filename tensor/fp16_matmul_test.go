@@ -21,10 +21,10 @@ func TestFP16MatMul(t *testing.T) {
 	cols := getCols()
 	expect := computeMatMul(rows, cols)
 	x := buildFP16(rows, cols)
-	result := x.MatMul(x).(*Float16).data
-	if !equalFP16(result, expect) {
-		tmp := make([]float32, len(result))
-		half.DecodeArray(result, tmp)
+	result := x.MatMul(x).Storage()
+	if !equal(result, expect) {
+		tmp := make([]float32, result.Size())
+		half.DecodeArray(result.Data().([]uint16), tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }
@@ -43,10 +43,10 @@ func TestFP16MatMulGo(t *testing.T) {
 	cols := getCols()
 	expect := computeMatMul(rows, cols)
 	x := buildFP16(rows, cols)
-	result := x.MatMul(x).(*Float16).data
-	if !equalFP16(result, expect) {
-		tmp := make([]float32, len(result))
-		half.DecodeArray(result, tmp)
+	result := x.MatMul(x).Storage()
+	if !equal(result, expect) {
+		tmp := make([]float32, result.Size())
+		half.DecodeArray(result.Data().([]uint16), tmp)
 		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
 	}
 }

@@ -62,6 +62,22 @@ public:
     }
   }
 
+  virtual void scalar_div_vector(const uint16_t x, const uint16_t *w,
+                                 uint16_t *y, int64_t d) {
+    size_t np = (d & ~(bs - 1));
+    T x_vec = _fp16_set1_ps<T>(fp16_to_fp32(x));
+    for (size_t i = 0; i < np; i += bs) {
+      T w_vec = _fp16_loadu<T>(w);
+      T2 y_vec = _fp16_div_ps<T, T2>(x_vec, w_vec);
+      _fp16_store_ps(y, y_vec);
+      w += bs;
+      y += bs;
+    }
+    for (size_t i = 0; i < d - np; i++) {
+      y[i] = fp32_to_fp16(fp16_to_fp32(x) / fp16_to_fp32(w[i]));
+    }
+  }
+
   virtual void div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) {
     size_t np = (d & ~(bs - 1));
@@ -102,8 +118,14 @@ void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
   _fp16->mul_vector(x, w, y, d);
 }
 
-void fp16_mul_scalar(const uint16_t *x, uint16_t w, uint16_t *y, int64_t d) {
+void fp16_mul_scalar(const uint16_t *x, const uint16_t w, uint16_t *y,
+                     int64_t d) {
   _fp16->mul_scalar(x, w, y, d);
+}
+
+void fp16_scalar_div_vector(const uint16_t x, const uint16_t *w, uint16_t *y,
+                            int64_t d) {
+  _fp16->scalar_div_vector(x, w, y, d);
 }
 
 void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,

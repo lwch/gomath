@@ -22,4 +22,11 @@ type Tensor interface {
 }
 
 type Storage interface {
+	Data() any
+	Size() int
+	Get(int64) any
+	Set(int64, any)
+	Range(func(int, any))
+	Row(int64) any
+	Copy(any)
 }
