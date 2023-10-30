@@ -6,10 +6,12 @@ import (
 
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/internal/half"
+	"github.com/lwch/gomath/internal/tensor/ctensor"
+	"github.com/lwch/gomath/internal/tensor/gotensor"
 )
 
-const benchmarkRows = 32
-const benchmarkCols = 1024
+const benchmarkRows = 64
+const benchmarkCols = 4096
 
 func getScalar() float32 {
 	return float32(rand.Intn(10) + 1)
@@ -129,44 +131,6 @@ func computeDivVector(rows, cols int64) ([]float32, []float32) {
 	return output, w
 }
 
-// func equalFP16(data []uint16, expect []float32) bool {
-// 	if len(data) != len(expect) {
-// 		return false
-// 	}
-// 	ok := true
-// 	var std float32
-// 	for i, v := range data {
-// 		std += float32(math.Pow(float64(half.Decode(v)-expect[i]), 2))
-// 		if v != half.Encode(expect[i]) {
-// 			ok = false
-// 		}
-// 	}
-// 	if ok {
-// 		return true
-// 	}
-// 	std /= float32(len(data))
-// 	return std < 0.01
-// }
-
-// func equal(data, expect []float32) bool {
-// 	if len(data) != len(expect) {
-// 		return false
-// 	}
-// 	ok := true
-// 	var std float32
-// 	for i, v := range data {
-// 		std += float32(math.Pow(float64(v-expect[i]), 2))
-// 		if v != expect[i] {
-// 			ok = false
-// 		}
-// 	}
-// 	if ok {
-// 		return true
-// 	}
-// 	std /= float32(len(data))
-// 	return std < 0.01
-// }
-
 func equal(data gomath.Storage, expect []float32) bool {
 	if data.Size() != len(expect) {
 		return false
@@ -188,4 +152,22 @@ func equal(data gomath.Storage, expect []float32) bool {
 	}
 	std /= float32(data.Size())
 	return std < 0.01
+}
+
+func useCTensor(fn func()) {
+	old := impl
+	var ok bool
+	impl, ok = ctensor.New()
+	if !ok {
+		panic("can not initialize ctensor")
+	}
+	fn()
+	impl = old
+}
+
+func useGoTensor(fn func()) {
+	old := impl
+	impl = gotensor.New()
+	fn()
+	impl = old
 }

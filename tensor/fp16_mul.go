@@ -26,18 +26,15 @@ func (t *Float16) mulScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	s := scalar.(uint16)
 	store := NewFloat16Storage(make([]uint16, t2.Storage().Size()), d)
 	data := store.Data().([]uint16)
-	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...int64) {
-		t.impl.FP16MulScalar(t2.Storage().Data().([]uint16)[offset:offset+size], s, data[offset:offset+size])
+	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
+		impl.FP16MulScalar(t2.Storage().Data().([]uint16)[offset:offset+size], s, data[offset:offset+size])
 	})
 	return NewFloat16WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
 }
 
-func (t *Float16) mulVector(ret, t1, t2 gomath.Tensor, idx, row1, row2, _ int64) {
-	t.impl.FP16MulVector(
-		t1.Storage().Row(row1).([]uint16),
-		t2.Storage().Row(row2).([]uint16),
-		ret.Storage().Row(idx).([]uint16))
+func (t *Float16) mulVector(ret, dx, dw any) {
+	impl.FP16MulVector(dx.([]uint16), dw.([]uint16), ret.([]uint16))
 }
 
 func (t *Float16) Div(t2 gomath.Tensor) gomath.Tensor {
@@ -59,8 +56,8 @@ func (t *Float16) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.
 	store := NewFloat16Storage(make([]uint16, t2.Storage().Size()), d)
 	data := store.Data().([]uint16)
 	ptr := t2.Storage().Data().([]uint16)
-	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...int64) {
-		t.impl.FP16ScalarDivVector(s, ptr[offset:offset+size], data[offset:offset+size])
+	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
+		impl.FP16ScalarDivVector(s, ptr[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat16WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
@@ -71,9 +68,6 @@ func (t *Float16) vectorDivScalar(scalar any, t2 gomath.Tensor, d int64) gomath.
 	return t.mulScalar(half.Encode(1/s), t2, d)
 }
 
-func (t *Float16) divVector(ret, t1, t2 gomath.Tensor, idx, row1, row2, d int64) {
-	t.impl.FP16DivVector(
-		t1.Storage().Row(row1).([]uint16),
-		t2.Storage().Row(row2).([]uint16),
-		ret.Storage().Row(idx).([]uint16))
+func (t *Float16) divVector(ret, dx, dw any) {
+	impl.FP16DivVector(dx.([]uint16), dw.([]uint16), ret.([]uint16))
 }

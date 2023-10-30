@@ -22,9 +22,6 @@ func (t *Float32) MatMul(t2 gomath.Tensor) gomath.Tensor {
 	}
 }
 
-func (t *Float32) matmul(ret, t1, t2 gomath.Tensor, idx, row1, row2, _ int64) {
-	vector1 := t.store.Row(row1)
-	vector2 := t.store.Row(row2)
-	ret.Storage().Set(idx, t.impl.FP32DotVector(
-		vector1.([]float32), vector2.([]float32)))
+func (t *Float32) matmul(ret, dx, dw any, col int64) {
+	ret.([]float32)[col] = impl.FP32DotVector(dx.([]float32), dw.([]float32))
 }

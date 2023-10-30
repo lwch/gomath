@@ -7,285 +7,309 @@ import (
 )
 
 func TestFP16Mul(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect := computeMul(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Mul(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMul(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Mul(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16MulGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect := computeMul(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Mul(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMul(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Mul(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16Mul(b *testing.B) {
-	debug = false
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.Mul(x)
-	}
+	useCTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.Mul(x)
+		}
+	})
 }
 
 func BenchmarkFP16MulGo(b *testing.B) {
-	debug = true
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.Mul(x)
-	}
+	useGoTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.Mul(x)
+		}
+	})
 }
 
 func TestFP16MulScalar(t *testing.T) {
-	debug = false
-	scalar := getScalar()
-	rows := getRows()
-	cols := getCols()
-	expect := computeMulScalar(rows, cols, scalar)
-	x := buildFP16(rows, cols)
-	result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		scalar := getScalar()
+		rows := getRows()
+		cols := getCols()
+		expect := computeMulScalar(rows, cols, scalar)
+		x := buildFP16(rows, cols)
+		result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16MulScalarGo(t *testing.T) {
-	debug = true
-	scalar := getScalar()
-	rows := getRows()
-	cols := getCols()
-	expect := computeMulScalar(rows, cols, scalar)
-	x := buildFP16(rows, cols)
-	result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		scalar := getScalar()
+		rows := getRows()
+		cols := getCols()
+		expect := computeMulScalar(rows, cols, scalar)
+		x := buildFP16(rows, cols)
+		result := x.Mul(NewFloat16([]float32{scalar}, []int64{1})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16MulScalar(b *testing.B) {
-	debug = false
-	scalar := getScalar()
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16([]float32{scalar}, []int64{1})
-	for i := 0; i < b.N; i++ {
-		x.Mul(w)
-	}
+	useCTensor(func() {
+		scalar := getScalar()
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16([]float32{scalar}, []int64{1})
+		for i := 0; i < b.N; i++ {
+			x.Mul(w)
+		}
+	})
 }
 
 func BenchmarkFP16MulScalarGo(b *testing.B) {
-	debug = true
-	scalar := getScalar()
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16([]float32{scalar}, []int64{1})
-	for i := 0; i < b.N; i++ {
-		x.Mul(w)
-	}
+	useGoTensor(func() {
+		scalar := getScalar()
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16([]float32{scalar}, []int64{1})
+		for i := 0; i < b.N; i++ {
+			x.Mul(w)
+		}
+	})
 }
 
 func TestFP16MulVector(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect, vec := computeMulVector(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Mul(NewFloat16(vec, []int64{cols})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect, vec := computeMulVector(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Mul(NewFloat16(vec, []int64{cols})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16MulVectorGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect, vec := computeMulVector(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Mul(NewFloat16(vec, []int64{cols})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect, vec := computeMulVector(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Mul(NewFloat16(vec, []int64{cols})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16MulVector(b *testing.B) {
-	debug = false
-	_, vec := computeMulVector(benchmarkRows, benchmarkCols)
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16(vec, []int64{benchmarkCols})
-	for i := 0; i < b.N; i++ {
-		x.Mul(w)
-	}
+	useCTensor(func() {
+		_, vec := computeMulVector(benchmarkRows, benchmarkCols)
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16(vec, []int64{benchmarkCols})
+		for i := 0; i < b.N; i++ {
+			x.Mul(w)
+		}
+	})
 }
 
 func BenchmarkFP16MulVectorGo(b *testing.B) {
-	debug = true
-	_, vec := computeMulVector(benchmarkRows, benchmarkCols)
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16(vec, []int64{benchmarkCols})
-	for i := 0; i < b.N; i++ {
-		x.Mul(w)
-	}
+	useGoTensor(func() {
+		_, vec := computeMulVector(benchmarkRows, benchmarkCols)
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16(vec, []int64{benchmarkCols})
+		for i := 0; i < b.N; i++ {
+			x.Mul(w)
+		}
+	})
 }
 
 func TestFP16Div(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect := computeDiv(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Div(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeDiv(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Div(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16DivGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect := computeDiv(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Div(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeDiv(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Div(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16Div(b *testing.B) {
-	debug = false
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.Div(x)
-	}
+	useCTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.Div(x)
+		}
+	})
 }
 
 func BenchmarkFP16DivGo(b *testing.B) {
-	debug = true
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.Div(x)
-	}
+	useGoTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.Div(x)
+		}
+	})
 }
 
 func TestFP16DivScalar(t *testing.T) {
-	debug = false
-	scalar := getScalar()
-	rows := getRows()
-	cols := getCols()
-	expect := computeDivScalar(rows, cols, scalar)
-	x := buildFP16(rows, cols)
-	result := x.Div(NewFloat16([]float32{scalar}, []int64{1})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		scalar := getScalar()
+		rows := getRows()
+		cols := getCols()
+		expect := computeDivScalar(rows, cols, scalar)
+		x := buildFP16(rows, cols)
+		result := x.Div(NewFloat16([]float32{scalar}, []int64{1})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16DivScalarGo(t *testing.T) {
-	debug = true
-	scalar := getScalar()
-	rows := getRows()
-	cols := getCols()
-	expect := computeDivScalar(rows, cols, scalar)
-	x := buildFP16(rows, cols)
-	result := x.Div(NewFloat16([]float32{scalar}, []int64{1})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		scalar := getScalar()
+		rows := getRows()
+		cols := getCols()
+		expect := computeDivScalar(rows, cols, scalar)
+		x := buildFP16(rows, cols)
+		result := x.Div(NewFloat16([]float32{scalar}, []int64{1})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16DivScalar(b *testing.B) {
-	debug = false
-	scalar := getScalar()
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16([]float32{scalar}, []int64{1})
-	for i := 0; i < b.N; i++ {
-		x.Div(w)
-	}
+	useCTensor(func() {
+		scalar := getScalar()
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16([]float32{scalar}, []int64{1})
+		for i := 0; i < b.N; i++ {
+			x.Div(w)
+		}
+	})
 }
 
 func BenchmarkFP16DivScalarGo(b *testing.B) {
-	debug = true
-	scalar := getScalar()
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16([]float32{scalar}, []int64{1})
-	for i := 0; i < b.N; i++ {
-		x.Div(w)
-	}
+	useGoTensor(func() {
+		scalar := getScalar()
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16([]float32{scalar}, []int64{1})
+		for i := 0; i < b.N; i++ {
+			x.Div(w)
+		}
+	})
 }
 
 func TestFP16DivVector(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect, vec := computeDivVector(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Div(NewFloat16(vec, []int64{cols})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect, vec := computeDivVector(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Div(NewFloat16(vec, []int64{cols})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func TestFP16DivVectorGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect, vec := computeDivVector(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.Div(NewFloat16(vec, []int64{cols})).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect, vec := computeDivVector(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.Div(NewFloat16(vec, []int64{cols})).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16DivVector(b *testing.B) {
-	debug = false
-	_, vec := computeDivVector(benchmarkRows, benchmarkCols)
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16(vec, []int64{benchmarkCols})
-	for i := 0; i < b.N; i++ {
-		x.Div(w)
-	}
+	useCTensor(func() {
+		_, vec := computeDivVector(benchmarkRows, benchmarkCols)
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16(vec, []int64{benchmarkCols})
+		for i := 0; i < b.N; i++ {
+			x.Div(w)
+		}
+	})
 }
 
 func BenchmarkFP16DivVectorGo(b *testing.B) {
-	debug = true
-	_, vec := computeDivVector(benchmarkRows, benchmarkCols)
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	w := NewFloat16(vec, []int64{benchmarkCols})
-	for i := 0; i < b.N; i++ {
-		x.Div(w)
-	}
+	useGoTensor(func() {
+		_, vec := computeDivVector(benchmarkRows, benchmarkCols)
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		w := NewFloat16(vec, []int64{benchmarkCols})
+		for i := 0; i < b.N; i++ {
+			x.Div(w)
+		}
+	})
 }

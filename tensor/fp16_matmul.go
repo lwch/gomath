@@ -21,9 +21,6 @@ func (t *Float16) MatMul(t2 gomath.Tensor) gomath.Tensor {
 	}
 }
 
-func (t *Float16) matmul(ret, t1, t2 gomath.Tensor, idx, row1, row2, _ int64) {
-	vector1 := t1.Storage().Row(row1)
-	vector2 := t2.Storage().Row(row2)
-	ret.Storage().Set(idx, t.impl.FP16DotVector(
-		vector1.([]uint16), vector2.([]uint16)))
+func (t *Float16) matmul(ret, dx, dw any, col int64) {
+	ret.([]uint16)[col] = impl.FP16DotVector(dx.([]uint16), dw.([]uint16))
 }

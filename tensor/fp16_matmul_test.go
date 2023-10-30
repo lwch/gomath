@@ -16,45 +16,49 @@ func buildFP16(rows, cols int64) gomath.Tensor {
 }
 
 func TestFP16MatMul(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect := computeMatMul(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.MatMul(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMatMul(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.MatMul(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16MatMul(b *testing.B) {
-	debug = false
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.MatMul(x)
-	}
+	useCTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.MatMul(x)
+		}
+	})
 }
 
 func TestFP16MatMulGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect := computeMatMul(rows, cols)
-	x := buildFP16(rows, cols)
-	result := x.MatMul(x).Storage()
-	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMatMul(rows, cols)
+		x := buildFP16(rows, cols)
+		result := x.MatMul(x).Storage()
+		if !equal(result, expect) {
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(result.Data().([]uint16), tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		}
+	})
 }
 
 func BenchmarkFP16MatMulGo(b *testing.B) {
-	debug = true
-	x := buildFP16(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.MatMul(x)
-	}
+	useGoTensor(func() {
+		x := buildFP16(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.MatMul(x)
+		}
+	})
 }

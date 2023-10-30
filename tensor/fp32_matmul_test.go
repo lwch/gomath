@@ -17,43 +17,47 @@ func buildFP32(rows, cols int64) gomath.Tensor {
 }
 
 func TestFP32MatMul(t *testing.T) {
-	debug = false
-	rows := getRows()
-	cols := getCols()
-	expect := computeMatMul(rows, cols)
-	x := buildFP32(rows, cols)
-	result := x.MatMul(x).Storage()
-	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
-	}
+	useCTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMatMul(rows, cols)
+		x := buildFP32(rows, cols)
+		result := x.MatMul(x).Storage()
+		if !equal(result, expect) {
+			t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
+		}
+	})
 }
 
 func BenchmarkFP32MatMul(b *testing.B) {
-	debug = false
-	x := buildFP32(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.MatMul(x)
-	}
+	useCTensor(func() {
+		x := buildFP32(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.MatMul(x)
+		}
+	})
 }
 
 func TestFP32MatMulGo(t *testing.T) {
-	debug = true
-	rows := getRows()
-	cols := getCols()
-	expect := computeMatMul(rows, cols)
-	x := buildFP32(rows, cols)
-	result := x.MatMul(x).Storage()
-	if !equal(result, expect) {
-		t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
-	}
+	useGoTensor(func() {
+		rows := getRows()
+		cols := getCols()
+		expect := computeMatMul(rows, cols)
+		x := buildFP32(rows, cols)
+		result := x.MatMul(x).Storage()
+		if !equal(result, expect) {
+			t.Fatalf("(%d, %d): expect %v, got %v", rows, cols, expect, result)
+		}
+	})
 }
 
 func BenchmarkFP32MatMulGo(b *testing.B) {
-	debug = true
-	x := buildFP32(benchmarkRows, benchmarkCols)
-	for i := 0; i < b.N; i++ {
-		x.MatMul(x)
-	}
+	useGoTensor(func() {
+		x := buildFP32(benchmarkRows, benchmarkCols)
+		for i := 0; i < b.N; i++ {
+			x.MatMul(x)
+		}
+	})
 }
 
 func fp32GoNumMatMul(x, y blas32.General, rows, cols int64) blas32.General {

@@ -5,14 +5,11 @@ import (
 	"github.com/lwch/gomath/consts"
 	"github.com/lwch/gomath/internal/half"
 	"github.com/lwch/gomath/internal/tensor"
-	"github.com/lwch/gomath/internal/tensor/ctensor"
-	"github.com/lwch/gomath/internal/tensor/gotensor"
 )
 
 type Float16 struct {
 	*tensor.Tensor
 	store *Float16Storage
-	impl  tensor.TensorImpl
 }
 
 var _ gomath.Tensor = &Float16{}
@@ -26,15 +23,6 @@ func NewFloat16WithStorage(s *Float16Storage, shape []int64, opts ...tensor.Opti
 	var ret Float16
 	ret.Tensor = tensor.New(args.Device, shape...)
 	ret.store = s
-	if debug {
-		ret.impl = gotensor.New()
-	} else {
-		var ok bool
-		ret.impl, ok = ctensor.New()
-		if !ok {
-			ret.impl = gotensor.New()
-		}
-	}
 	return &ret
 }
 
