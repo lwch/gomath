@@ -10,8 +10,8 @@ import (
 var debug bool
 
 type fnBuild func(shapes []int64) gomath.Tensor
-type fnScalarAndVector func(scalar any, t gomath.Tensor) gomath.Tensor
-type fnVectorAndVector func(ret, t, t2 gomath.Tensor, idx, row1, row2 int64)
+type fnScalarAndVector func(scalar any, t gomath.Tensor, d int64) gomath.Tensor
+type fnVectorAndVector func(ret, t, t2 gomath.Tensor, idx, row1, row2, d int64)
 
 func matMul(t, t2 gomath.Tensor, build fnBuild, dotVector fnVectorAndVector) gomath.Tensor {
 	size1, d1 := splitShapes(t)
@@ -21,7 +21,7 @@ func matMul(t, t2 gomath.Tensor, build fnBuild, dotVector fnVectorAndVector) gom
 	}
 	if len(size1) == 0 && len(size2) == 0 {
 		ret := build([]int64{1})
-		dotVector(ret, t, t2, 0, 0, 0)
+		dotVector(ret, t, t2, 0, 0, 0, d1)
 		return ret
 	}
 	var m, n int64
@@ -73,7 +73,7 @@ func matMul(t, t2 gomath.Tensor, build fnBuild, dotVector fnVectorAndVector) gom
 					parallel(n, int64(core), func(offset, size int64, args ...int64) {
 						idx, group, row := args[0], args[1], args[2]
 						for col := offset; col < offset+size; col++ {
-							dotVector(ret, t, t2, idx+col, (group*m+row)%group1, (group*n+col)%group2)
+							dotVector(ret, t, t2, idx+col, (group*m+row)%group1, (group*n+col)%group2, d1)
 						}
 					}, idx, group, row)
 				}
@@ -90,10 +90,10 @@ func computeVectors(t, t2 gomath.Tensor,
 	size1, d1 := splitShapes(t)
 	size2, d2 := splitShapes(t2)
 	if len(size1) == 0 {
-		return scalar2Vector(t.Storage().Get(0), t2)
+		return scalar2Vector(t.Storage().Get(0), t2, d2)
 	}
 	if len(size2) == 0 {
-		return vector2Scalar(t2.Storage().Get(0), t)
+		return vector2Scalar(t2.Storage().Get(0), t, d1)
 	}
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", t.Size(), t2.Size()))
@@ -125,7 +125,7 @@ func computeVectors(t, t2 gomath.Tensor,
 	ret := build(append(targetShapes, d1))
 	parallel(targetGroups, int64(runtime.NumCPU()), func(offset, size int64, _ ...int64) {
 		for block := offset; block < offset+size; block++ {
-			vector2Vector(ret, t, t2, block, block%group1, block%group2)
+			vector2Vector(ret, t, t2, block, block%group1, block%group2, d1)
 		}
 	})
 	return ret

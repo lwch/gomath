@@ -11,10 +11,10 @@ type Float32Storage struct {
 
 var _ gomath.Storage = &Float32Storage{}
 
-func newFloat32Storage(size int, d int64) *Float32Storage {
+func NewFloat32Storage(data []float32, d int64) *Float32Storage {
 	return &Float32Storage{
 		d:    d,
-		data: make([]float32, size),
+		data: data,
 	}
 }
 

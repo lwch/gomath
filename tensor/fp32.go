@@ -17,7 +17,7 @@ type Float32 struct {
 
 var _ gomath.Tensor = &Float32{}
 
-func NewFloat32(data []float32, shape []int64, opts ...tensor.Option) *Float32 {
+func NewFloat32WithStorage(s *Float32Storage, shape []int64, opts ...tensor.Option) *Float32 {
 	args := tensor.DefaultOptions()
 	for _, opt := range opts {
 		opt(args)
@@ -25,8 +25,7 @@ func NewFloat32(data []float32, shape []int64, opts ...tensor.Option) *Float32 {
 
 	var ret Float32
 	ret.Tensor = tensor.New(args.Device, shape...)
-	ret.store = newFloat32Storage(int(sumShapes(shape)), shape[len(shape)-1])
-	ret.store.Copy(data)
+	ret.store = s
 	if debug {
 		ret.impl = gotensor.New()
 	} else {
@@ -37,6 +36,12 @@ func NewFloat32(data []float32, shape []int64, opts ...tensor.Option) *Float32 {
 		}
 	}
 	return &ret
+}
+
+func NewFloat32(data []float32, shape []int64, opts ...tensor.Option) *Float32 {
+	cvt := make([]float32, sumShapes(shape))
+	copy(cvt, data)
+	return NewFloat32WithStorage(NewFloat32Storage(cvt, shape[len(shape)-1]), shape, opts...)
 }
 
 func (t *Float32) Type() consts.Type {

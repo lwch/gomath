@@ -17,7 +17,7 @@ type Float16 struct {
 
 var _ gomath.Tensor = &Float16{}
 
-func NewFloat16(data []float32, shape []int64, opts ...tensor.Option) *Float16 {
+func NewFloat16WithStorage(s *Float16Storage, shape []int64, opts ...tensor.Option) *Float16 {
 	args := tensor.DefaultOptions()
 	for _, opt := range opts {
 		opt(args)
@@ -25,8 +25,7 @@ func NewFloat16(data []float32, shape []int64, opts ...tensor.Option) *Float16 {
 
 	var ret Float16
 	ret.Tensor = tensor.New(args.Device, shape...)
-	ret.store = newFloat16Storage(int(sumShapes(shape)), shape[len(shape)-1])
-	ret.store.Copy(data)
+	ret.store = s
 	if debug {
 		ret.impl = gotensor.New()
 	} else {
@@ -39,26 +38,18 @@ func NewFloat16(data []float32, shape []int64, opts ...tensor.Option) *Float16 {
 	return &ret
 }
 
-func NewFloat16Raw(data []uint16, shape []int64, opts ...tensor.Option) *Float16 {
-	args := tensor.DefaultOptions()
-	for _, opt := range opts {
-		opt(args)
+func NewFloat16(data []float32, shape []int64, opts ...tensor.Option) *Float16 {
+	cvt := make([]uint16, sumShapes(shape))
+	for i, v := range data {
+		cvt[i] = half.Encode(v)
 	}
+	return NewFloat16WithStorage(NewFloat16Storage(cvt, shape[len(shape)-1]), shape, opts...)
+}
 
-	var ret Float16
-	ret.Tensor = tensor.New(args.Device, shape...)
-	ret.store = newFloat16Storage(int(sumShapes(shape)), shape[len(shape)-1])
-	ret.store.Copy(data)
-	if debug {
-		ret.impl = gotensor.New()
-	} else {
-		var ok bool
-		ret.impl, ok = ctensor.New()
-		if !ok {
-			ret.impl = gotensor.New()
-		}
-	}
-	return &ret
+func NewFloat16Raw(data []uint16, shape []int64, opts ...tensor.Option) *Float16 {
+	cvt := make([]uint16, sumShapes(shape))
+	copy(cvt, data)
+	return NewFloat16WithStorage(NewFloat16Storage(cvt, shape[len(shape)-1]), shape, opts...)
 }
 
 func (t *Float16) Type() consts.Type {

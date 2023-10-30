@@ -12,10 +12,10 @@ type Float16Storage struct {
 
 var _ gomath.Storage = &Float16Storage{}
 
-func newFloat16Storage(size int, d int64) *Float16Storage {
+func NewFloat16Storage(data []uint16, d int64) *Float16Storage {
 	return &Float16Storage{
 		d:    d,
-		data: make([]uint16, size),
+		data: data,
 	}
 }
 
