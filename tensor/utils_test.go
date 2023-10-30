@@ -180,9 +180,14 @@ func testMatMul(t *testing.T, build func(int64, int64) gomath.Tensor) {
 	x := build(rows, cols)
 	result := x.MatMul(x).Storage()
 	if !equal(result, expect) {
-		tmp := make([]float32, result.Size())
-		half.DecodeArray(result.Data().([]uint16), tmp)
-		t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		switch data := result.Data().(type) {
+		case []uint16:
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(data, tmp)
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
+		case []float32:
+			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, data)
+		}
 	}
 }
 
