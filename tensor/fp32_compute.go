@@ -5,6 +5,7 @@ import (
 
 	"github.com/lwch/gomath"
 	"github.com/lwch/gomath/consts"
+	"github.com/lwch/gomath/internal/tensor"
 )
 
 func (t *Float32) Mul(t2 gomath.Tensor) gomath.Tensor {
@@ -21,7 +22,7 @@ func (t *Float32) Mul(t2 gomath.Tensor) gomath.Tensor {
 	}
 }
 
-func (t *Float32) mulScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+func (t *Float32) mulScalar(impl tensor.TensorImpl, scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
 	s := scalar.(float32)
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)
@@ -50,7 +51,7 @@ func (t *Float32) Div(t2 gomath.Tensor) gomath.Tensor {
 	}
 }
 
-func (t *Float32) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+func (t *Float32) scalarDivVector(impl tensor.TensorImpl, scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
 	s := scalar.(float32)
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)
@@ -62,9 +63,9 @@ func (t *Float32) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.
 		gomath.WithDevice(t.Device()))
 }
 
-func (t *Float32) vectorDivScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+func (t *Float32) vectorDivScalar(impl tensor.TensorImpl, scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
 	s := scalar.(float32)
-	return t.mulScalar(1/s, t2, d)
+	return t.mulScalar(impl, 1/s, t2, d)
 }
 
 func (t *Float32) divVector(ret, dx, dw any) {
@@ -85,7 +86,7 @@ func (t *Float32) Add(t2 gomath.Tensor) gomath.Tensor {
 	}
 }
 
-func (t *Float32) addScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+func (t *Float32) addScalar(impl tensor.TensorImpl, scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
 	s := scalar.(float32)
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)

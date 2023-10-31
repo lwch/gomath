@@ -11,6 +11,7 @@ import (
 )
 
 var impl tensor.TensorImpl
+var goImpl tensor.TensorImpl
 
 func init() {
 	var ok bool
@@ -18,10 +19,11 @@ func init() {
 	if !ok {
 		impl = gotensor.New()
 	}
+	goImpl = gotensor.New()
 }
 
 type fnBuild func(shapes []int64) gomath.Tensor
-type fnScalarAndVector func(scalar any, t gomath.Tensor, d int64) gomath.Tensor
+type fnScalarAndVector func(impl tensor.TensorImpl, scalar any, t gomath.Tensor, d int64) gomath.Tensor
 type fnVectorAndVector func(ret, x, w any)
 type fnDotVector func(ret, x, w any, col int64)
 
@@ -129,10 +131,16 @@ func computeVectors(x, w gomath.Tensor,
 	size1, d1 := splitShapes(x)
 	size2, d2 := splitShapes(w)
 	if len(size1) == 0 && d1 == 1 {
-		return scalar2Vector(x.Storage().Get(0), w, d2)
+		if len(size2) == 0 || len(size2) == 1 {
+			return scalar2Vector(goImpl, x.Storage().Get(0), w, d2)
+		}
+		return scalar2Vector(impl, x.Storage().Get(0), w, d2)
 	}
 	if len(size2) == 0 && d2 == 1 {
-		return vector2Scalar(w.Storage().Get(0), x, d1)
+		if len(size1) == 0 || len(size1) == 1 {
+			return vector2Scalar(goImpl, w.Storage().Get(0), x, d1)
+		}
+		return vector2Scalar(impl, w.Storage().Get(0), x, d1)
 	}
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", x.Size(), w.Size()))
