@@ -19,7 +19,7 @@ func convert(t gomath.Tensor, dtype consts.Type) gomath.Tensor {
 func convertFloat16(t *Float16, dtype consts.Type) gomath.Tensor {
 	switch dtype {
 	case consts.Float16:
-		panic("no need")
+		return t
 	case consts.Float32:
 		return convertFloat16ToFloat32(t)
 	}
@@ -31,7 +31,7 @@ func convertFloat32(t *Float32, dtype consts.Type) gomath.Tensor {
 	case consts.Float16:
 		return convertFloat32ToFloat16(t)
 	case consts.Float32:
-		panic("no need")
+		return t
 	}
 	panic("not support")
 }

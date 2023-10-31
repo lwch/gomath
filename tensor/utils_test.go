@@ -34,104 +34,6 @@ func getCols() int64 {
 	return cols
 }
 
-func computeMatMul(rows, cols int64) []float32 {
-	x := make([]float32, rows*cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*rows)
-	for m := int64(0); m < rows; m++ {
-		for n := int64(0); n < rows; n++ {
-			var dx float32
-			for d := int64(0); d < cols; d++ {
-				dx += x[m*cols+d] * x[n*cols+d]
-			}
-			output[m*rows+n] = dx
-		}
-	}
-	return output
-}
-
-func computeMul(rows, cols int64) []float32 {
-	x := make([]float32, rows*cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] * x[i]
-	}
-	return output
-}
-
-func computeMulScalar(rows, cols int64, scalar float32) []float32 {
-	x := make([]float32, rows*cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] * scalar
-	}
-	return output
-}
-
-func computeMulVector(rows, cols int64) ([]float32, []float32) {
-	x := make([]float32, rows*cols)
-	w := make([]float32, cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	for i := range w {
-		w[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] * w[i%cols]
-	}
-	return output, w
-}
-
-func computeDiv(rows, cols int64) []float32 {
-	x := make([]float32, rows*cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] / x[i]
-	}
-	return output
-}
-
-func computeDivScalar(rows, cols int64, scalar float32) []float32 {
-	x := make([]float32, rows*cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] / scalar
-	}
-	return output
-}
-
-func computeDivVector(rows, cols int64) ([]float32, []float32) {
-	x := make([]float32, rows*cols)
-	w := make([]float32, cols)
-	for i := range x {
-		x[i] = float32(i) + 1
-	}
-	for i := range w {
-		w[i] = float32(i) + 1
-	}
-	output := make([]float32, rows*cols)
-	for i := int64(0); i < rows*cols; i++ {
-		output[i] = x[i] / w[i%cols]
-	}
-	return output, w
-}
-
 func equal(data gomath.Storage, expect []float32) bool {
 	if data.Size() != len(expect) {
 		return false
@@ -155,6 +57,19 @@ func equal(data gomath.Storage, expect []float32) bool {
 	return std < 0.01
 }
 
+func compareAndAssert(t *testing.T, result gomath.Storage, expect []float32, prefix string) {
+	if !equal(result, expect) {
+		switch data := result.Data().(type) {
+		case []uint16:
+			tmp := make([]float32, result.Size())
+			half.DecodeArray(data, tmp)
+			t.Fatalf("%s: expect=%v, got=%v", prefix, expect, tmp)
+		case []float32:
+			t.Fatalf("%s: expect=%v, got=%v", prefix, expect, data)
+		}
+	}
+}
+
 func useCTensor(fn func()) {
 	old := impl
 	var ok bool
@@ -171,56 +86,4 @@ func useGoTensor(fn func()) {
 	impl = gotensor.New()
 	fn()
 	impl = old
-}
-
-func testMatMul(t *testing.T, build func(int64, int64) gomath.Tensor) {
-	rows := getRows()
-	cols := getCols()
-	expect := computeMatMul(rows, cols)
-	x := build(rows, cols)
-	result := x.MatMul(x).Storage()
-	if !equal(result, expect) {
-		switch data := result.Data().(type) {
-		case []uint16:
-			tmp := make([]float32, result.Size())
-			half.DecodeArray(data, tmp)
-			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-		case []float32:
-			t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, data)
-		}
-	}
-}
-
-func testMul(t *testing.T,
-	buildMatrix func(int64, int64) gomath.Tensor,
-	buildScalar func(n float32) gomath.Tensor) {
-	rows := getRows()
-	cols := getCols()
-	compare := func(result gomath.Storage, expect []float32) {
-		if !equal(result, expect) {
-			switch data := result.Data().(type) {
-			case []uint16:
-				tmp := make([]float32, result.Size())
-				half.DecodeArray(data, tmp)
-				t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, tmp)
-			case []float32:
-				t.Fatalf("(%d, %d): expect=%v, got=%v", rows, cols, expect, data)
-			}
-		}
-	}
-	// matrix * matrix
-	expect := computeMul(rows, cols)
-	x := buildMatrix(rows, cols)
-	result := x.Mul(x).Storage()
-	compare(result, expect)
-	// scalar * matrix
-	scalar := getScalar()
-	expect = computeMulScalar(rows, cols, scalar)
-	result = buildScalar(scalar).Mul(x).Storage()
-	compare(result, expect)
-	// matrix * scalar
-	scalar = getScalar()
-	expect = computeMulScalar(rows, cols, scalar)
-	result = x.Mul(buildScalar(scalar)).Storage()
-	compare(result, expect)
 }

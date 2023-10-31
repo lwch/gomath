@@ -68,6 +68,10 @@ func (t *Float16) View(shape []int64) gomath.Tensor {
 	panic("implement me")
 }
 
+func (t *Float16) ToType(tp consts.Type) gomath.Tensor {
+	return convert(t, tp)
+}
+
 func convertFloat16ToFloat32(t *Float16) *Float32 {
 	data := make([]float32, t.store.Size())
 	t.store.Range(func(i int, a any) {

@@ -128,10 +128,10 @@ func computeVectors(x, w gomath.Tensor,
 	vector2Vector fnVectorAndVector) gomath.Tensor {
 	size1, d1 := splitShapes(x)
 	size2, d2 := splitShapes(w)
-	if len(size1) == 0 {
+	if len(size1) == 0 && d1 == 1 {
 		return scalar2Vector(x.Storage().Get(0), w, d2)
 	}
-	if len(size2) == 0 {
+	if len(size2) == 0 && d2 == 1 {
 		return vector2Scalar(w.Storage().Get(0), x, d1)
 	}
 	if d1 != d2 {

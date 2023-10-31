@@ -7,6 +7,7 @@ import (
 type Tensor interface {
 	Device() consts.Device
 	ToDevice(consts.Device)
+	ToType(consts.Type) Tensor
 	Type() consts.Type
 	Size() []int64
 	Stride() []int64

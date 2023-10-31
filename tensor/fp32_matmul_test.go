@@ -8,7 +8,15 @@ import (
 	"gonum.org/v1/gonum/blas/blas32"
 )
 
-func buildFP32(rows, cols int64) gomath.Tensor {
+func buildFP32Vector(cols int64) gomath.Tensor {
+	data := make([]float32, cols)
+	for i := range data {
+		data[i] = float32(i) + 1
+	}
+	return NewFloat32(data, []int64{cols})
+}
+
+func buildFP32Matrix(rows, cols int64) gomath.Tensor {
 	data := make([]float32, rows*cols)
 	for i := range data {
 		data[i] = float32(i) + 1
@@ -18,13 +26,13 @@ func buildFP32(rows, cols int64) gomath.Tensor {
 
 func TestFP32MatMul(t *testing.T) {
 	useCTensor(func() {
-		testMatMul(t, buildFP32)
+		testMatMul(t, buildFP32Vector, buildFP32Matrix)
 	})
 }
 
 func BenchmarkFP32MatMul(b *testing.B) {
 	useCTensor(func() {
-		x := buildFP32(benchmarkRows, benchmarkCols)
+		x := buildFP32Matrix(benchmarkRows, benchmarkCols)
 		for i := 0; i < b.N; i++ {
 			x.MatMul(x)
 		}
@@ -33,13 +41,13 @@ func BenchmarkFP32MatMul(b *testing.B) {
 
 func TestFP32MatMulGo(t *testing.T) {
 	useGoTensor(func() {
-		testMatMul(t, buildFP32)
+		testMatMul(t, buildFP32Vector, buildFP32Matrix)
 	})
 }
 
 func BenchmarkFP32MatMulGo(b *testing.B) {
 	useGoTensor(func() {
-		x := buildFP32(benchmarkRows, benchmarkCols)
+		x := buildFP32Matrix(benchmarkRows, benchmarkCols)
 		for i := 0; i < b.N; i++ {
 			x.MatMul(x)
 		}
