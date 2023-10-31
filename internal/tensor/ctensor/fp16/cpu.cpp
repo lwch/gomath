@@ -9,6 +9,39 @@
 
 #if !(defined(__APPLE__) && defined(__arm64__))
 
+#define COMPUTE_VECTOR(fn, op)                                                 \
+  do {                                                                         \
+    size_t np = (d & ~(bs - 1));                                               \
+    for (size_t i = 0; i < np; i += bs) {                                      \
+      T x_vec = _fp16_loadu<T>(x);                                             \
+      T w_vec = _fp16_loadu<T>(w);                                             \
+      T2 y_vec = fn<T, T2>(x_vec, w_vec);                                      \
+      _fp16_store_ps(y, y_vec);                                                \
+      x += bs;                                                                 \
+      w += bs;                                                                 \
+      y += bs;                                                                 \
+    }                                                                          \
+    for (size_t i = 0; i < d - np; i++) {                                      \
+      y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) op fp16_to_fp32(w[i]));           \
+    }                                                                          \
+  } while (0)
+
+#define COMPUTE_SCALAR(fn, op)                                                 \
+  do {                                                                         \
+    size_t np = (d & ~(bs - 1));                                               \
+    T x_vec = _fp16_set1_ps<T>(fp16_to_fp32(x));                               \
+    for (size_t i = 0; i < np; i += bs) {                                      \
+      T w_vec = _fp16_loadu<T>(w);                                             \
+      T2 y_vec = fn<T, T2>(x_vec, w_vec);                                      \
+      _fp16_store_ps(y, y_vec);                                                \
+      w += bs;                                                                 \
+      y += bs;                                                                 \
+    }                                                                          \
+    for (size_t i = 0; i < d - np; i++) {                                      \
+      y[i] = fp32_to_fp16(fp16_to_fp32(x) op fp16_to_fp32(w[i]));              \
+    }                                                                          \
+  } while (0)
+
 template <typename T, typename T2> class fp16_impl : public fp16 {
 public:
   // dot_vector
@@ -29,70 +62,24 @@ public:
     return fp32_to_fp16(y);
   }
 
+  virtual void mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+                          int64_t d) {
+    COMPUTE_SCALAR(_fp16_mul_ps, *);
+  }
+
   virtual void mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) {
-    size_t np = (d & ~(bs - 1));
-    for (size_t i = 0; i < np; i += bs) {
-      T x_vec = _fp16_loadu<T>(x);
-      T w_vec = _fp16_loadu<T>(w);
-      T2 y_vec = _fp16_mul_ps<T, T2>(x_vec, w_vec);
-      _fp16_store_ps(y, y_vec);
-      x += bs;
-      w += bs;
-      y += bs;
-    }
-    for (size_t i = 0; i < d - np; i++) {
-      y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) * fp16_to_fp32(w[i]));
-    }
+    COMPUTE_VECTOR(_fp16_mul_ps, *);
   }
 
-  virtual void mul_scalar(const uint16_t *x, uint16_t w, uint16_t *y,
+  virtual void div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
                           int64_t d) {
-    size_t np = (d & ~(bs - 1));
-    T w_vec = _fp16_set1_ps<T>(fp16_to_fp32(w));
-    for (size_t i = 0; i < np; i += bs) {
-      T x_vec = _fp16_loadu<T>(x);
-      T2 y_vec = _fp16_mul_ps<T, T2>(x_vec, w_vec);
-      _fp16_store_ps(y, y_vec);
-      x += bs;
-      y += bs;
-    }
-    for (size_t i = 0; i < d - np; i++) {
-      y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) * fp16_to_fp32(w));
-    }
-  }
-
-  virtual void scalar_div_vector(const uint16_t x, const uint16_t *w,
-                                 uint16_t *y, int64_t d) {
-    size_t np = (d & ~(bs - 1));
-    T x_vec = _fp16_set1_ps<T>(fp16_to_fp32(x));
-    for (size_t i = 0; i < np; i += bs) {
-      T w_vec = _fp16_loadu<T>(w);
-      T2 y_vec = _fp16_div_ps<T, T2>(x_vec, w_vec);
-      _fp16_store_ps(y, y_vec);
-      w += bs;
-      y += bs;
-    }
-    for (size_t i = 0; i < d - np; i++) {
-      y[i] = fp32_to_fp16(fp16_to_fp32(x) / fp16_to_fp32(w[i]));
-    }
+    COMPUTE_SCALAR(_fp16_div_ps, /);
   }
 
   virtual void div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) {
-    size_t np = (d & ~(bs - 1));
-    for (size_t i = 0; i < np; i += bs) {
-      T x_vec = _fp16_loadu<T>(x);
-      T w_vec = _fp16_loadu<T>(w);
-      T2 y_vec = _fp16_div_ps<T, T2>(x_vec, w_vec);
-      _fp16_store_ps(y, y_vec);
-      x += bs;
-      w += bs;
-      y += bs;
-    }
-    for (size_t i = 0; i < d - np; i++) {
-      y[i] = fp32_to_fp16(fp16_to_fp32(x[i]) / fp16_to_fp32(w[i]));
-    }
+    COMPUTE_VECTOR(_fp16_div_ps, /);
   }
 };
 
@@ -113,19 +100,19 @@ uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d) {
   return _fp16->dot_vector(x, w, d);
 }
 
+void fp16_mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+                     int64_t d) {
+  _fp16->mul_scalar(x, w, y, d);
+}
+
 void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
   _fp16->mul_vector(x, w, y, d);
 }
 
-void fp16_mul_scalar(const uint16_t *x, const uint16_t w, uint16_t *y,
+void fp16_div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
-  _fp16->mul_scalar(x, w, y, d);
-}
-
-void fp16_scalar_div_vector(const uint16_t x, const uint16_t *w, uint16_t *y,
-                            int64_t d) {
-  _fp16->scalar_div_vector(x, w, y, d);
+  _fp16->div_scalar(x, w, y, d);
 }
 
 void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,

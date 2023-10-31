@@ -26,7 +26,7 @@ func (t *Float32) mulScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		impl.FP32MulScalar(t2.Storage().Data().([]float32)[offset:offset+size], s, data[offset:offset+size])
+		impl.FP32MulScalar(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat32WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
@@ -56,7 +56,7 @@ func (t *Float32) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.
 	data := store.Data().([]float32)
 	ptr := t2.Storage().Data().([]float32)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		impl.FP32ScalarDivVector(s, ptr[offset:offset+size], data[offset:offset+size])
+		impl.FP32DivScalar(s, ptr[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat32WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))

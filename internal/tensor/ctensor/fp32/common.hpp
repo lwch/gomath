@@ -10,12 +10,12 @@ public:
   fp32() {}
   virtual ~fp32() {}
   virtual float dot_vector(const float *x, const float *w, int64_t d) = 0;
+  virtual void mul_scalar(const float x, const float *w, float *y,
+                          int64_t d) = 0;
   virtual void mul_vector(const float *x, const float *w, float *y,
                           int64_t d) = 0;
-  virtual void mul_scalar(const float *x, const float w, float *y,
+  virtual void div_scalar(const float x, const float *w, float *y,
                           int64_t d) = 0;
-  virtual void scalar_div_vector(const float x, const float *w, float *y,
-                                 int64_t d) = 0;
   virtual void div_vector(const float *x, const float *w, float *y,
                           int64_t d) = 0;
 };

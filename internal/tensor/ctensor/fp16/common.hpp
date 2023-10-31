@@ -12,12 +12,12 @@ public:
   virtual ~fp16() {}
   virtual uint16_t dot_vector(const uint16_t *x, const uint16_t *w,
                               int64_t d) = 0;
+  virtual void mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+                          int64_t d) = 0;
   virtual void mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) = 0;
-  virtual void mul_scalar(const uint16_t *x, const uint16_t w, uint16_t *y,
+  virtual void div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
                           int64_t d) = 0;
-  virtual void scalar_div_vector(const uint16_t x, const uint16_t *w,
-                                 uint16_t *y, int64_t d) = 0;
   virtual void div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                           int64_t d) = 0;
 };

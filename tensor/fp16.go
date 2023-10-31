@@ -48,10 +48,6 @@ func (t *Float16) Storage() gomath.Storage {
 	return t.store
 }
 
-func (t *Float16) Add(t2 gomath.Tensor) gomath.Tensor {
-	panic("implement me")
-}
-
 func (t *Float16) Sub(t2 gomath.Tensor) gomath.Tensor {
 	panic("implement me")
 }

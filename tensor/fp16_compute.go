@@ -27,7 +27,7 @@ func (t *Float16) mulScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	store := NewFloat16Storage(make([]uint16, t2.Storage().Size()), d)
 	data := store.Data().([]uint16)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		impl.FP16MulScalar(t2.Storage().Data().([]uint16)[offset:offset+size], s, data[offset:offset+size])
+		impl.FP16MulScalar(s, t2.Storage().Data().([]uint16)[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat16WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
@@ -57,7 +57,7 @@ func (t *Float16) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.
 	data := store.Data().([]uint16)
 	ptr := t2.Storage().Data().([]uint16)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		impl.FP16ScalarDivVector(s, ptr[offset:offset+size], data[offset:offset+size])
+		impl.FP16DivScalar(s, ptr[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat16WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
@@ -70,4 +70,33 @@ func (t *Float16) vectorDivScalar(scalar any, t2 gomath.Tensor, d int64) gomath.
 
 func (t *Float16) divVector(ret, dx, dw any) {
 	impl.FP16DivVector(dx.([]uint16), dw.([]uint16), ret.([]uint16))
+}
+
+func (t *Float16) Add(t2 gomath.Tensor) gomath.Tensor {
+	switch t2.Type() {
+	case consts.Float16:
+		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
+			s := NewFloat16Storage(make([]uint16, sumShapes(shapes)), shapes[len(shapes)-1])
+			return NewFloat16WithStorage(s, shapes, gomath.WithDevice(t.Device()))
+		}, t.addScalar, t.addScalar, t.addVector)
+	case consts.Float32:
+		return convert(t, consts.Float32).Add(t2)
+	default:
+		panic(ErrNotSupported)
+	}
+}
+
+func (t *Float16) addScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+	s := scalar.(uint16)
+	store := NewFloat16Storage(make([]uint16, t2.Storage().Size()), d)
+	data := store.Data().([]uint16)
+	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
+		impl.FP16AddScalar(t2.Storage().Data().([]uint16)[offset:offset+size], s, data[offset:offset+size])
+	})
+	return NewFloat16WithStorage(store, t.Size(),
+		gomath.WithDevice(t.Device()))
+}
+
+func (t *Float16) addVector(ret, dx, dw any) {
+	impl.FP16AddVector(dx.([]uint16), dw.([]uint16), ret.([]uint16))
 }
