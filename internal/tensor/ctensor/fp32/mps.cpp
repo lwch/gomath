@@ -8,5 +8,7 @@ void fp32_mul_scalar(const float, const float *, float *, int64_t) {}
 void fp32_mul_vector(const float *, const float *, float *, int64_t) {}
 void fp32_div_scalar(const float, const float *, float *, int64_t) {}
 void fp32_div_vector(const float *, const float *, float *, int64_t) {}
+void fp32_add_scalar(const float, const float *, float *, int64_t) {}
+void fp32_add_vector(const float *, const float *, float *, int64_t) {}
 
 #endif

@@ -91,7 +91,7 @@ func (t *Float16) addScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	store := NewFloat16Storage(make([]uint16, t2.Storage().Size()), d)
 	data := store.Data().([]uint16)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		impl.FP16AddScalar(t2.Storage().Data().([]uint16)[offset:offset+size], s, data[offset:offset+size])
+		impl.FP16AddScalar(s, t2.Storage().Data().([]uint16)[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat16WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))

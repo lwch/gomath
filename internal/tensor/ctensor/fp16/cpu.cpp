@@ -45,7 +45,7 @@
 template <typename T, typename T2> class fp16_impl : public fp16 {
 public:
   // dot_vector
-  virtual uint16_t dot_vector(const uint16_t *x, const uint16_t *w, int64_t d) {
+  virtual uint16_t dot(const uint16_t *x, const uint16_t *w, int64_t d) {
     size_t np = (d & ~(bs - 1));
     T y_vec = _fp16_zero_ps<T>();
     for (size_t i = 0; i < np; i += bs) {
@@ -62,24 +62,34 @@ public:
     return fp32_to_fp16(y);
   }
 
-  virtual void mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
-                          int64_t d) {
+  virtual void mul(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
     COMPUTE_SCALAR(_fp16_mul_ps, *);
   }
 
-  virtual void mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                          int64_t d) {
+  virtual void mul(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
     COMPUTE_VECTOR(_fp16_mul_ps, *);
   }
 
-  virtual void div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
-                          int64_t d) {
+  virtual void div(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
     COMPUTE_SCALAR(_fp16_div_ps, /);
   }
 
-  virtual void div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                          int64_t d) {
+  virtual void div(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
     COMPUTE_VECTOR(_fp16_div_ps, /);
+  }
+
+  virtual void add(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
+    COMPUTE_SCALAR(_fp16_add_ps, +);
+  }
+
+  virtual void add(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
+    COMPUTE_VECTOR(_fp16_add_ps, +);
   }
 };
 
@@ -97,27 +107,37 @@ bool fp16_init() {
 }
 
 uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d) {
-  return _fp16->dot_vector(x, w, d);
+  return _fp16->dot(x, w, d);
 }
 
 void fp16_mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
-  _fp16->mul_scalar(x, w, y, d);
+  _fp16->mul(x, w, y, d);
 }
 
 void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
-  _fp16->mul_vector(x, w, y, d);
+  _fp16->mul(x, w, y, d);
 }
 
 void fp16_div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
-  _fp16->div_scalar(x, w, y, d);
+  _fp16->div(x, w, y, d);
 }
 
 void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
-  _fp16->div_vector(x, w, y, d);
+  _fp16->div(x, w, y, d);
+}
+
+void fp16_add_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+                     int64_t d) {
+  _fp16->add(x, w, y, d);
+}
+
+void fp16_add_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                     int64_t d) {
+  _fp16->add(x, w, y, d);
 }
 
 #endif

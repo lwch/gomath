@@ -44,7 +44,7 @@
 template <typename T> class fp32_impl : public fp32 {
 public:
   // dot_vector
-  virtual float dot_vector(const float *x, const float *w, int64_t d) {
+  virtual float dot(const float *x, const float *w, int64_t d) {
     size_t np = (d & ~(bs - 1));
     T y_vec = _fp32_zero_ps<T>();
     for (size_t i = 0; i < np; i += bs) {
@@ -61,20 +61,28 @@ public:
     return y;
   }
 
-  virtual void mul_scalar(const float x, const float *w, float *y, int64_t d) {
+  virtual void mul(const float x, const float *w, float *y, int64_t d) {
     COMPUTE_SCALAR(_fp32_mul_ps, *);
   }
 
-  virtual void mul_vector(const float *x, const float *w, float *y, int64_t d) {
+  virtual void mul(const float *x, const float *w, float *y, int64_t d) {
     COMPUTE_VECTOR(_fp32_mul_ps, *);
   }
 
-  virtual void div_scalar(const float x, const float *w, float *y, int64_t d) {
+  virtual void div(const float x, const float *w, float *y, int64_t d) {
     COMPUTE_SCALAR(_fp32_div_ps, /);
   }
 
-  virtual void div_vector(const float *x, const float *w, float *y, int64_t d) {
+  virtual void div(const float *x, const float *w, float *y, int64_t d) {
     COMPUTE_VECTOR(_fp32_div_ps, /);
+  }
+
+  virtual void add(const float x, const float *w, float *y, int64_t d) {
+    COMPUTE_SCALAR(_fp32_add_ps, +);
+  }
+
+  virtual void add(const float *x, const float *w, float *y, int64_t d) {
+    COMPUTE_VECTOR(_fp32_add_ps, +);
   }
 };
 
@@ -92,23 +100,31 @@ bool fp32_init() {
 }
 
 float fp32_dot_vector(const float *x, const float *w, int64_t d) {
-  return _fp32->dot_vector(x, w, d);
+  return _fp32->dot(x, w, d);
 }
 
 void fp32_mul_vector(const float *x, const float *w, float *y, int64_t d) {
-  _fp32->mul_vector(x, w, y, d);
+  _fp32->mul(x, w, y, d);
 }
 
 void fp32_mul_scalar(const float x, const float *w, float *y, int64_t d) {
-  _fp32->mul_scalar(x, w, y, d);
+  _fp32->mul(x, w, y, d);
 }
 
 void fp32_div_scalar(const float x, const float *w, float *y, int64_t d) {
-  _fp32->div_scalar(x, w, y, d);
+  _fp32->div(x, w, y, d);
 }
 
 void fp32_div_vector(const float *x, const float *w, float *y, int64_t d) {
-  _fp32->div_vector(x, w, y, d);
+  _fp32->div(x, w, y, d);
+}
+
+void fp32_add_scalar(const float x, const float *w, float *y, int64_t d) {
+  _fp32->add(x, w, y, d);
+}
+
+void fp32_add_vector(const float *x, const float *w, float *y, int64_t d) {
+  _fp32->add(x, w, y, d);
 }
 
 #endif

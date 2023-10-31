@@ -9,15 +9,13 @@ class fp32 {
 public:
   fp32() {}
   virtual ~fp32() {}
-  virtual float dot_vector(const float *x, const float *w, int64_t d) = 0;
-  virtual void mul_scalar(const float x, const float *w, float *y,
-                          int64_t d) = 0;
-  virtual void mul_vector(const float *x, const float *w, float *y,
-                          int64_t d) = 0;
-  virtual void div_scalar(const float x, const float *w, float *y,
-                          int64_t d) = 0;
-  virtual void div_vector(const float *x, const float *w, float *y,
-                          int64_t d) = 0;
+  virtual float dot(const float *x, const float *w, int64_t d) = 0;
+  virtual void mul(const float x, const float *w, float *y, int64_t d) = 0;
+  virtual void mul(const float *x, const float *w, float *y, int64_t d) = 0;
+  virtual void div(const float x, const float *w, float *y, int64_t d) = 0;
+  virtual void div(const float *x, const float *w, float *y, int64_t d) = 0;
+  virtual void add(const float x, const float *w, float *y, int64_t d) = 0;
+  virtual void add(const float *x, const float *w, float *y, int64_t d) = 0;
 };
 
 // load fp32 into register
@@ -112,6 +110,20 @@ template <> inline __m256 _fp32_div_ps(const __m256 &x, const __m256 &y) {
 
 template <> inline __m512 _fp32_div_ps(const __m512 &x, const __m512 &y) {
   return _mm512_div_ps(x, y);
+}
+
+// add
+
+template <typename T> inline T _fp32_add_ps(const T &x, const T &y) {
+  throw not_implemented_exception("_fp32_add_ps");
+}
+
+template <> inline __m256 _fp32_add_ps(const __m256 &x, const __m256 &y) {
+  return _mm256_add_ps(x, y);
+}
+
+template <> inline __m512 _fp32_add_ps(const __m512 &x, const __m512 &y) {
+  return _mm512_add_ps(x, y);
 }
 
 // store

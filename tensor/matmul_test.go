@@ -28,30 +28,53 @@ func testMatMul(t *testing.T,
 	matrix := buildMatrix(rows, cols)
 	fp32Matrix := matrix.ToType(consts.Float32)
 
+	var tfn func(*testing.T)
+
+	test := func(name string) {
+		useCTensor(func() {
+			t.Run(name+"/C", tfn)
+		})
+		useGoTensor(func() {
+			t.Run(name+"/Go", tfn)
+		})
+	}
+
 	// vector @ vector
-	value := dotVector(vectorValues, vectorValues)
-	compareAndAssert(t, vector.MatMul(vector).Storage(), []float32{value}, "vector @ vector")
+	tfn = func(t *testing.T) {
+		value := dotVector(vectorValues, vectorValues)
+		compareAndAssert(t, vector.MatMul(vector).Storage(), []float32{value})
+	}
+	test("Vector2Vector")
 
 	// vector @ matrix(broadcast)
-	values := make([]float32, rows)
-	for i := int64(0); i < rows; i++ {
-		values[i] = dotVector(vectorValues, fp32Matrix.Storage().Row(i).([]float32))
+	tfn = func(t *testing.T) {
+		values := make([]float32, rows)
+		for i := int64(0); i < rows; i++ {
+			values[i] = dotVector(vectorValues, fp32Matrix.Storage().Row(i).([]float32))
+		}
+		compareAndAssert(t, vector.MatMul(matrix).Storage(), values)
 	}
-	compareAndAssert(t, vector.MatMul(matrix).Storage(), values, "vector @ matrix")
+	test("Vector2Matrix")
 
 	// matrix @ vector(broadcast)
-	values = make([]float32, rows)
-	for i := range values {
-		values[i] = dotVector(fp32Matrix.Storage().Row(int64(i)).([]float32), vectorValues)
+	tfn = func(t *testing.T) {
+		values := make([]float32, rows)
+		for i := range values {
+			values[i] = dotVector(fp32Matrix.Storage().Row(int64(i)).([]float32), vectorValues)
+		}
+		compareAndAssert(t, matrix.MatMul(vector).Storage(), values)
 	}
-	compareAndAssert(t, matrix.MatMul(vector).Storage(), values, "matrix @ vector")
+	test("Matrix2Vector")
 
 	// matrix @ matrix
-	values = make([]float32, rows*rows)
-	for row := int64(0); row < rows; row++ {
-		for col := int64(0); col < rows; col++ {
-			values[row*rows+col] = dotVector(fp32Matrix.Storage().Row(row).([]float32), fp32Matrix.Storage().Row(col).([]float32))
+	tfn = func(t *testing.T) {
+		values := make([]float32, rows*rows)
+		for row := int64(0); row < rows; row++ {
+			for col := int64(0); col < rows; col++ {
+				values[row*rows+col] = dotVector(fp32Matrix.Storage().Row(row).([]float32), fp32Matrix.Storage().Row(col).([]float32))
+			}
 		}
+		compareAndAssert(t, matrix.MatMul(matrix).Storage(), values)
 	}
-	compareAndAssert(t, matrix.MatMul(matrix).Storage(), values, "matrix @ matrix")
+	test("Matrix2Matrix")
 }

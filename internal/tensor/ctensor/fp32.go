@@ -46,3 +46,21 @@ func (*CTensor) FP32DivVector(x, w, y []float32) {
 		C.int64_t(len(x)),
 	)
 }
+
+func (*CTensor) FP32AddScalar(x float32, w, y []float32) {
+	C.fp32_add_scalar(
+		C.float(x),
+		(*C.float)(&w[0]),
+		(*C.float)(&y[0]),
+		C.int64_t(len(w)),
+	)
+}
+
+func (*CTensor) FP32AddVector(x, w, y []float32) {
+	C.fp32_add_vector(
+		(*C.float)(&x[0]),
+		(*C.float)(&w[0]),
+		(*C.float)(&y[0]),
+		C.int64_t(len(x)),
+	)
+}

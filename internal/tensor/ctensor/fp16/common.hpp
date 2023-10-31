@@ -10,16 +10,19 @@ class fp16 {
 public:
   fp16() {}
   virtual ~fp16() {}
-  virtual uint16_t dot_vector(const uint16_t *x, const uint16_t *w,
-                              int64_t d) = 0;
-  virtual void mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
-                          int64_t d) = 0;
-  virtual void mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                          int64_t d) = 0;
-  virtual void div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
-                          int64_t d) = 0;
-  virtual void div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                          int64_t d) = 0;
+  virtual uint16_t dot(const uint16_t *x, const uint16_t *w, int64_t d) = 0;
+  virtual void mul(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void mul(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void div(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void div(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void add(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void add(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
 };
 
 // load fp16 into register
@@ -118,6 +121,21 @@ template <> inline __m128i _fp16_div_ps(const __m256 &x, const __m256 &y) {
 
 template <> inline __m256i _fp16_div_ps(const __m512 &x, const __m512 &y) {
   return _mm512_cvtps_ph(_mm512_div_ps(x, y), 0);
+}
+
+// add
+
+template <typename T, typename T2>
+inline T2 _fp16_add_ps(const T &x, const T &y) {
+  throw not_implemented_exception("_fp16_add_ps");
+}
+
+template <> inline __m128i _fp16_add_ps(const __m256 &x, const __m256 &y) {
+  return _mm256_cvtps_ph(_mm256_add_ps(x, y), 0);
+}
+
+template <> inline __m256i _fp16_add_ps(const __m512 &x, const __m512 &y) {
+  return _mm512_cvtps_ph(_mm512_add_ps(x, y), 0);
 }
 
 // store

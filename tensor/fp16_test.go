@@ -27,12 +27,7 @@ func buildFP16Matrix(rows, cols int64) gomath.Tensor {
 }
 
 func TestFP16MatMul(t *testing.T) {
-	testC(t, func(t *testing.T) {
-		testMatMul(t, buildFP16Vector, buildFP16Matrix)
-	})
-	testGo(t, func(t *testing.T) {
-		testMatMul(t, buildFP16Vector, buildFP16Matrix)
-	})
+	testMatMul(t, buildFP16Vector, buildFP16Matrix)
 }
 
 func BenchmarkFP16MatMul(b *testing.B) {
@@ -43,33 +38,49 @@ func BenchmarkFP16MatMul(b *testing.B) {
 }
 
 func TestFP16Mul(t *testing.T) {
-	testC(t, func(t *testing.T) {
-		testMul(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix)
-	})
-	testGo(t, func(t *testing.T) {
-		testMul(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix)
-	})
+	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w float32) float32 {
+			return x * w
+		}, func(x, w gomath.Tensor) gomath.Tensor {
+			return x.Mul(w)
+		})
 }
 
 func BenchmarkFP16Mul(b *testing.B) {
-	batchBenchmark(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Mul(w)
 		})
 }
 
 func TestFP16Div(t *testing.T) {
-	testC(t, func(t *testing.T) {
-		testDiv(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix)
-	})
-	testGo(t, func(t *testing.T) {
-		testDiv(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix)
-	})
+	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w float32) float32 {
+			return x / w
+		}, func(x, w gomath.Tensor) gomath.Tensor {
+			return x.Div(w)
+		})
 }
 
 func BenchmarkFP16Div(b *testing.B) {
-	batchBenchmark(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Div(w)
+		})
+}
+
+func TestFP16Add(t *testing.T) {
+	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w float32) float32 {
+			return x + w
+		}, func(x, w gomath.Tensor) gomath.Tensor {
+			return x.Add(w)
+		})
+}
+
+func BenchmarkFP16Add(b *testing.B) {
+	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w gomath.Tensor) {
+			x.Add(w)
 		})
 }
