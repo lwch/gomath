@@ -11,7 +11,7 @@ func (t *Float16) MatMul(t2 gomath.Tensor) gomath.Tensor {
 		return matMul(t, t2, func(shapes []int64) gomath.Tensor {
 			data := make([]uint16, sumShapes(shapes))
 			return NewFloat16WithStorage(
-				NewFloat16Storage(data, shapes[len(shapes)-1]),
+				NewFloat16Storage(data),
 				shapes, gomath.WithDevice(t.Device()))
 		}, t.matmul)
 	case *Float32:

@@ -50,7 +50,7 @@ func testMatMul(t *testing.T,
 	tfn = func(t *testing.T) {
 		values := make([]float32, rows)
 		for i := int64(0); i < rows; i++ {
-			values[i] = dotVector(vectorValues, fp32Matrix.Storage().Row(i).([]float32))
+			values[i] = dotVector(vectorValues, fp32Matrix.(batchRow).row(i).([]float32))
 		}
 		compareAndAssert(t, vector.MatMul(matrix).Storage(), values)
 	}
@@ -60,7 +60,7 @@ func testMatMul(t *testing.T,
 	tfn = func(t *testing.T) {
 		values := make([]float32, rows)
 		for i := range values {
-			values[i] = dotVector(fp32Matrix.Storage().Row(int64(i)).([]float32), vectorValues)
+			values[i] = dotVector(fp32Matrix.(batchRow).row(int64(i)).([]float32), vectorValues)
 		}
 		compareAndAssert(t, matrix.MatMul(vector).Storage(), values)
 	}
@@ -71,7 +71,9 @@ func testMatMul(t *testing.T,
 		values := make([]float32, rows*rows)
 		for row := int64(0); row < rows; row++ {
 			for col := int64(0); col < rows; col++ {
-				values[row*rows+col] = dotVector(fp32Matrix.Storage().Row(row).([]float32), fp32Matrix.Storage().Row(col).([]float32))
+				values[row*rows+col] = dotVector(
+					fp32Matrix.(batchRow).row(row).([]float32),
+					fp32Matrix.(batchRow).row(col).([]float32))
 			}
 		}
 		compareAndAssert(t, matrix.MatMul(matrix).Storage(), values)

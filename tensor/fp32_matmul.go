@@ -14,7 +14,7 @@ func (t *Float32) MatMul(t2 gomath.Tensor) gomath.Tensor {
 			func(shapes []int64) gomath.Tensor {
 				data := make([]float32, sumShapes(shapes))
 				return NewFloat32WithStorage(
-					NewFloat32Storage(data, shapes[len(shapes)-1]),
+					NewFloat32Storage(data),
 					shapes, gomath.WithDevice(t.Device()))
 			}, t.matmul)
 	default:

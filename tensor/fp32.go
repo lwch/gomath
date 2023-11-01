@@ -9,12 +9,12 @@ import (
 
 type Float32 struct {
 	*tensor.Tensor
-	store *Float32Storage
+	store Float32Storage
 }
 
 var _ gomath.Tensor = &Float32{}
 
-func NewFloat32WithStorage(s *Float32Storage, shape []int64, opts ...tensor.Option) *Float32 {
+func NewFloat32WithStorage(s Float32Storage, shape []int64, opts ...tensor.Option) *Float32 {
 	args := tensor.DefaultOptions()
 	for _, opt := range opts {
 		opt(args)
@@ -29,7 +29,7 @@ func NewFloat32WithStorage(s *Float32Storage, shape []int64, opts ...tensor.Opti
 func NewFloat32(data []float32, shape []int64, opts ...tensor.Option) *Float32 {
 	cvt := make([]float32, sumShapes(shape))
 	copy(cvt, data)
-	return NewFloat32WithStorage(NewFloat32Storage(cvt, shape[len(shape)-1]), shape, opts...)
+	return NewFloat32WithStorage(NewFloat32Storage(cvt), shape, opts...)
 }
 
 func (t *Float32) Type() consts.Type {
@@ -54,6 +54,11 @@ func (t *Float32) View(shape []int64) gomath.Tensor {
 
 func (t *Float32) ToType(tp consts.Type) gomath.Tensor {
 	return convert(t, tp)
+}
+
+func (t *Float32) row(i int64) any {
+	d := t.Size()[t.Dim()-1]
+	return []float32(t.store[i*d : (i+1)*d])
 }
 
 func convertFloat32ToFloat16(t *Float32) gomath.Tensor {

@@ -10,6 +10,10 @@ import (
 	"github.com/lwch/gomath/internal/tensor/gotensor"
 )
 
+type batchRow interface {
+	row(int64) any
+}
+
 var impl tensor.TensorImpl
 var goImpl tensor.TensorImpl
 
@@ -23,7 +27,7 @@ func init() {
 }
 
 type fnBuild func(shapes []int64) gomath.Tensor
-type fnScalarAndVector func(scalar any, t gomath.Tensor, d int64) gomath.Tensor
+type fnScalarAndVector func(scalar any, t gomath.Tensor) gomath.Tensor
 type fnVectorAndVector func(ret, x, w any)
 type fnDotVector func(ret, x, w any, col int64)
 
@@ -84,10 +88,10 @@ func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Ten
 		parallel(m, int64(core), func(offset, size int64, args ...any) {
 			for row := offset; row < offset+size; row++ {
 				idx := offset1 + row
-				dTarget := ret.Storage().Row(idx)
-				dx := x.Storage().Row(idx % group1)
+				dTarget := ret.(batchRow).row(idx)
+				dx := x.(batchRow).row(idx % group1)
 				for col := int64(0); col < n; col++ {
-					dw := w.Storage().Row((offset2 + col) % group2)
+					dw := w.(batchRow).row((offset2 + col) % group2)
 					dotVector(dTarget, dx, dw, col)
 				}
 			}
@@ -96,11 +100,11 @@ func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Ten
 	parallelW := func(offset1, offset2 int64) {
 		parallel(n, int64(core), func(offset, size int64, args ...any) {
 			for col := offset; col < offset+size; col++ {
-				dw := w.Storage().Row((offset2 + col) % group2)
+				dw := w.(batchRow).row((offset2 + col) % group2)
 				for row := int64(0); row < m; row++ {
 					idx := offset1 + row
-					dTarget := ret.Storage().Row(idx)
-					dx := x.Storage().Row(idx % group1)
+					dTarget := ret.(batchRow).row(idx)
+					dx := x.(batchRow).row(idx % group1)
 					dotVector(dTarget, dx, dw, col)
 				}
 			}
@@ -131,10 +135,10 @@ func computeVectors(x, w gomath.Tensor,
 	size1, d1 := splitShapes(x)
 	size2, d2 := splitShapes(w)
 	if len(size1) == 0 && d1 == 1 {
-		return scalar2Vector(x.Storage().Get(0), w, d2)
+		return scalar2Vector(x.Storage().Get(0), w)
 	}
 	if len(size2) == 0 && d2 == 1 {
-		return vector2Scalar(w.Storage().Get(0), x, d1)
+		return vector2Scalar(w.Storage().Get(0), x)
 	}
 	if d1 != d2 {
 		panic(fmt.Errorf("dimension mismatch: %v and %v", x.Size(), w.Size()))
@@ -166,9 +170,9 @@ func computeVectors(x, w gomath.Tensor,
 	ret := build(append(targetShapes, d1))
 	parallel(targetGroups, int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
 		for block := offset; block < offset+size; block++ {
-			dTarget := ret.Storage().Row(block)
-			dx := x.Storage().Row(block % group1)
-			dw := w.Storage().Row(block % group2)
+			dTarget := ret.(batchRow).row(block)
+			dx := x.(batchRow).row(block % group1)
+			dw := w.(batchRow).row(block % group2)
 			vector2Vector(dTarget, dx, dw)
 		}
 	})
