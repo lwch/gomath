@@ -2,26 +2,26 @@ package tensor
 
 type TensorImpl interface {
 	// fp16
-	FP16DotVector(x, w []uint16) uint16
+	FP16Dot(x, w []uint16) uint16
 	// mul
-	FP16MulScalar(x uint16, w, y []uint16)
-	FP16MulVector(x, w, y []uint16)
+	FP16Mul(x, w, y []uint16)
+	FP16ScalarMul(x uint16, w, y []uint16)
 	// div
-	FP16DivScalar(x uint16, w, y []uint16)
-	FP16DivVector(x, w, y []uint16)
+	FP16Div(x, w, y []uint16)
+	FP16ScalarDiv(x uint16, w, y []uint16)
 	// add
-	FP16AddScalar(x uint16, w, y []uint16)
-	FP16AddVector(x, w, y []uint16)
+	FP16Add(x, w, y []uint16)
+	FP16ScalarAdd(x uint16, w, y []uint16)
 
 	// fp32
-	FP32DotVector(x, w []float32) float32
+	FP32Dot(x, w []float32) float32
 	// mul
-	FP32MulScalar(x float32, w, y []float32)
-	FP32MulVector(x, w, y []float32)
+	FP32Mul(x, w, y []float32)
+	FP32ScalarMul(x float32, w, y []float32)
 	// div
-	FP32DivScalar(x float32, w, y []float32)
-	FP32DivVector(x, w, y []float32)
+	FP32Div(x, w, y []float32)
+	FP32ScalarDiv(x float32, w, y []float32)
 	// add
-	FP32AddScalar(x float32, w, y []float32)
-	FP32AddVector(x, w, y []float32)
+	FP32Add(x, w, y []float32)
+	FP32ScalarAdd(x float32, w, y []float32)
 }

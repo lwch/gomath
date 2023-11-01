@@ -26,14 +26,14 @@ func (t *Float32) mulScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		goImpl.FP32MulScalar(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
+		goImpl.FP32ScalarMul(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat32WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
 }
 
 func (t *Float32) mulVector(ret, dx, dw any) {
-	impl.FP32MulVector(dx.([]float32), dw.([]float32), ret.([]float32))
+	impl.FP32Mul(dx.([]float32), dw.([]float32), ret.([]float32))
 }
 
 func (t *Float32) Div(t2 gomath.Tensor) gomath.Tensor {
@@ -56,7 +56,7 @@ func (t *Float32) scalarDivVector(scalar any, t2 gomath.Tensor, d int64) gomath.
 	data := store.Data().([]float32)
 	ptr := t2.Storage().Data().([]float32)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		goImpl.FP32DivScalar(s, ptr[offset:offset+size], data[offset:offset+size])
+		goImpl.FP32ScalarDiv(s, ptr[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat32WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
@@ -68,7 +68,7 @@ func (t *Float32) vectorDivScalar(scalar any, t2 gomath.Tensor, d int64) gomath.
 }
 
 func (t *Float32) divVector(ret, dx, dw any) {
-	impl.FP32DivVector(dx.([]float32), dw.([]float32), ret.([]float32))
+	impl.FP32Div(dx.([]float32), dw.([]float32), ret.([]float32))
 }
 
 func (t *Float32) Add(t2 gomath.Tensor) gomath.Tensor {
@@ -90,12 +90,12 @@ func (t *Float32) addScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
 	data := store.Data().([]float32)
 	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
-		goImpl.FP32AddScalar(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
+		goImpl.FP32ScalarAdd(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
 	})
 	return NewFloat32WithStorage(store, t.Size(),
 		gomath.WithDevice(t.Device()))
 }
 
 func (t *Float32) addVector(ret, dx, dw any) {
-	impl.FP32AddVector(dx.([]float32), dw.([]float32), ret.([]float32))
+	impl.FP32Add(dx.([]float32), dw.([]float32), ret.([]float32))
 }

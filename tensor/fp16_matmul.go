@@ -22,5 +22,5 @@ func (t *Float16) MatMul(t2 gomath.Tensor) gomath.Tensor {
 }
 
 func (t *Float16) matmul(ret, dx, dw any, col int64) {
-	ret.([]uint16)[col] = impl.FP16DotVector(dx.([]uint16), dw.([]uint16))
+	ret.([]uint16)[col] = impl.FP16Dot(dx.([]uint16), dw.([]uint16))
 }
