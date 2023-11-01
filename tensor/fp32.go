@@ -44,6 +44,10 @@ func (t *Float32) Sub(t2 gomath.Tensor) gomath.Tensor {
 	panic("implement me")
 }
 
+func (t *Float32) SubScalar(n float32) gomath.Tensor {
+	panic("implement me")
+}
+
 func (t *Float32) Transpose() gomath.Tensor {
 	panic("implement me")
 }

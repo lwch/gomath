@@ -23,6 +23,10 @@ func (t *Tensor) Device() consts.Device {
 	return t.device
 }
 
+func (t *Tensor) Dim() int64 {
+	return int64(len(t.shape))
+}
+
 func (t *Tensor) Size() []int64 {
 	return t.shape
 }
