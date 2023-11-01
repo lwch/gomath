@@ -91,6 +91,16 @@ public:
                    int64_t d) {
     COMPUTE_VECTOR(_fp16_add_ps, +);
   }
+
+  virtual void sub(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
+    COMPUTE_SCALAR(_fp16_sub_ps, -);
+  }
+
+  virtual void sub(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) {
+    COMPUTE_VECTOR(_fp16_sub_ps, -);
+  }
 };
 
 static fp16 *_fp16;
@@ -106,38 +116,44 @@ bool fp16_init() {
   return false;
 }
 
-uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d) {
+uint16_t fp16_dot(const uint16_t *x, const uint16_t *w, int64_t d) {
   return _fp16->dot(x, w, d);
 }
 
-void fp16_mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_mul(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
   _fp16->mul(x, w, y, d);
 }
 
-void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                     int64_t d) {
+void fp16_mul(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d) {
   _fp16->mul(x, w, y, d);
 }
 
-void fp16_div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_div(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
   _fp16->div(x, w, y, d);
 }
 
-void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                     int64_t d) {
+void fp16_div(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d) {
   _fp16->div(x, w, y, d);
 }
 
-void fp16_add_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_add(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {
   _fp16->add(x, w, y, d);
 }
 
-void fp16_add_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                     int64_t d) {
+void fp16_add(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d) {
   _fp16->add(x, w, y, d);
+}
+
+void fp16_scalar_sub(const uint16_t x, const uint16_t *w, uint16_t *y,
+                     int64_t d) {
+  _fp16->sub(x, w, y, d);
+}
+
+void fp16_sub(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d) {
+  _fp16->sub(x, w, y, d);
 }
 
 #endif

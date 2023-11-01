@@ -48,14 +48,6 @@ func (t *Float16) Storage() gomath.Storage {
 	return t.store
 }
 
-func (t *Float16) Sub(t2 gomath.Tensor) gomath.Tensor {
-	panic("implement me")
-}
-
-func (t *Float16) SubScalar(n float32) gomath.Tensor {
-	panic("implement me")
-}
-
 func (t *Float16) Transpose() gomath.Tensor {
 	panic("implement me")
 }

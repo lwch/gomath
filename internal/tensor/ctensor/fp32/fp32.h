@@ -11,19 +11,23 @@ extern "C" {
 bool fp32_init();
 
 // dot
-float fp32_dot_vector(const float *x, const float *w, int64_t d);
+float fp32_dot(const float *x, const float *w, int64_t d);
 
 // mul
-void fp32_mul_scalar(const float x, const float *w, float *y, int64_t d);
-void fp32_mul_vector(const float *x, const float *w, float *y, int64_t d);
+void fp32_scalar_mul(const float x, const float *w, float *y, int64_t d);
+void fp32_mul(const float *x, const float *w, float *y, int64_t d);
 
 // div
-void fp32_div_scalar(const float x, const float *w, float *y, int64_t d);
-void fp32_div_vector(const float *x, const float *w, float *y, int64_t d);
+void fp32_scalar_div(const float x, const float *w, float *y, int64_t d);
+void fp32_div(const float *x, const float *w, float *y, int64_t d);
 
 // add
-void fp32_add_scalar(const float x, const float *w, float *y, int64_t d);
-void fp32_add_vector(const float *x, const float *w, float *y, int64_t d);
+void fp32_scalar_add(const float x, const float *w, float *y, int64_t d);
+void fp32_add(const float *x, const float *w, float *y, int64_t d);
+
+// sub
+void fp32_scalar_sub(const float x, const float *w, float *y, int64_t d);
+void fp32_sub(const float *x, const float *w, float *y, int64_t d);
 
 #ifdef __cplusplus
 }

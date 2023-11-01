@@ -39,3 +39,15 @@ func (*GoTensor) FP32ScalarAdd(x float32, w, y []float32) {
 		y[i] = x + w[i]
 	}
 }
+
+func (*GoTensor) FP32Sub(x, w, y []float32) {
+	for i := range x {
+		y[i] = x[i] - w[i]
+	}
+}
+
+func (*GoTensor) FP32ScalarSub(x float32, w, y []float32) {
+	for i := range w {
+		y[i] = x - w[i]
+	}
+}

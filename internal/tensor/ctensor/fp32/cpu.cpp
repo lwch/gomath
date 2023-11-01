@@ -84,6 +84,14 @@ public:
   virtual void add(const float *x, const float *w, float *y, int64_t d) {
     COMPUTE_VECTOR(_fp32_add_ps, +);
   }
+
+  virtual void sub(const float x, const float *w, float *y, int64_t d) {
+    COMPUTE_SCALAR(_fp32_sub_ps, -);
+  }
+
+  virtual void sub(const float *x, const float *w, float *y, int64_t d) {
+    COMPUTE_VECTOR(_fp32_sub_ps, -);
+  }
 };
 
 static fp32 *_fp32;
@@ -99,32 +107,40 @@ bool fp32_init() {
   return false;
 }
 
-float fp32_dot_vector(const float *x, const float *w, int64_t d) {
+float fp32_dot(const float *x, const float *w, int64_t d) {
   return _fp32->dot(x, w, d);
 }
 
-void fp32_mul_vector(const float *x, const float *w, float *y, int64_t d) {
+void fp32_mul(const float *x, const float *w, float *y, int64_t d) {
   _fp32->mul(x, w, y, d);
 }
 
-void fp32_mul_scalar(const float x, const float *w, float *y, int64_t d) {
+void fp32_scalar_mul(const float x, const float *w, float *y, int64_t d) {
   _fp32->mul(x, w, y, d);
 }
 
-void fp32_div_scalar(const float x, const float *w, float *y, int64_t d) {
+void fp32_scalar_div(const float x, const float *w, float *y, int64_t d) {
   _fp32->div(x, w, y, d);
 }
 
-void fp32_div_vector(const float *x, const float *w, float *y, int64_t d) {
+void fp32_div(const float *x, const float *w, float *y, int64_t d) {
   _fp32->div(x, w, y, d);
 }
 
-void fp32_add_scalar(const float x, const float *w, float *y, int64_t d) {
+void fp32_scalar_add(const float x, const float *w, float *y, int64_t d) {
   _fp32->add(x, w, y, d);
 }
 
-void fp32_add_vector(const float *x, const float *w, float *y, int64_t d) {
+void fp32_add(const float *x, const float *w, float *y, int64_t d) {
   _fp32->add(x, w, y, d);
+}
+
+void fp32_scalar_sub(const float x, const float *w, float *y, int64_t d) {
+  _fp32->sub(x, w, y, d);
+}
+
+void fp32_sub(const float *x, const float *w, float *y, int64_t d) {
+  _fp32->sub(x, w, y, d);
 }
 
 #endif

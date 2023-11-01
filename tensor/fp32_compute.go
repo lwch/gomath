@@ -111,3 +111,41 @@ func (t *Float32) scalarAdd(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor
 func (t *Float32) add(ret, dx, dw any) {
 	impl.FP32Add(dx.([]float32), dw.([]float32), ret.([]float32))
 }
+
+func (t *Float32) Sub(t2 gomath.Tensor) gomath.Tensor {
+	switch t2.(type) {
+	case *Float16:
+		return t.Sub(convert(t2, consts.Float32))
+	case *Float32:
+		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
+			s := NewFloat32Storage(make([]float32, sumShapes(shapes)), shapes[len(shapes)-1])
+			return NewFloat32WithStorage(s, shapes, gomath.WithDevice(t.Device()))
+		}, t.scalarSub, t.subScalar, t.sub)
+	default:
+		panic(ErrNotSupported)
+	}
+}
+
+func (t *Float32) SubScalar(n float32) gomath.Tensor {
+	return t.subScalar(n, t, t.Size()[t.Dim()-1])
+}
+
+func (t *Float32) scalarSub(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+	s := scalar.(float32)
+	store := NewFloat32Storage(make([]float32, t2.Storage().Size()), d)
+	data := store.Data().([]float32)
+	parallel(int64(t2.Storage().Size()), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
+		goImpl.FP32ScalarSub(s, t2.Storage().Data().([]float32)[offset:offset+size], data[offset:offset+size])
+	})
+	return NewFloat32WithStorage(store, t2.Size(),
+		gomath.WithDevice(t.Device()))
+}
+
+func (t *Float32) subScalar(scalar any, t2 gomath.Tensor, d int64) gomath.Tensor {
+	s := scalar.(float32)
+	return t.scalarAdd(-s, t2, d)
+}
+
+func (t *Float32) sub(ret, dx, dw any) {
+	impl.FP32Sub(dx.([]float32), dw.([]float32), ret.([]float32))
+}

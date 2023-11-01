@@ -11,25 +11,27 @@ extern "C" {
 bool fp16_init();
 
 // dot
-uint16_t fp16_dot_vector(const uint16_t *x, const uint16_t *w, int64_t d);
+uint16_t fp16_dot(const uint16_t *x, const uint16_t *w, int64_t d);
 
 // mul
-void fp16_mul_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_mul(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d);
-void fp16_mul_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                     int64_t d);
+void fp16_mul(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d);
 
 // div
-void fp16_div_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_div(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d);
-void fp16_div_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
-                     int64_t d);
+void fp16_div(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d);
 
 // add
-void fp16_add_scalar(const uint16_t x, const uint16_t *w, uint16_t *y,
+void fp16_scalar_add(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d);
-void fp16_add_vector(const uint16_t *x, const uint16_t *w, uint16_t *y,
+void fp16_add(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d);
+
+// sub
+void fp16_scalar_sub(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d);
+void fp16_sub(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d);
 
 #ifdef __cplusplus
 }

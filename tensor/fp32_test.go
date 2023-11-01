@@ -84,3 +84,19 @@ func BenchmarkFP32Add(b *testing.B) {
 			x.Add(w)
 		})
 }
+
+func TestFP32Sub(t *testing.T) {
+	testCompute(t, buildFP32Scalar, buildFP32Vector, buildFP32Matrix,
+		func(x, w float32) float32 {
+			return x - w
+		}, func(x, w gomath.Tensor) gomath.Tensor {
+			return x.Sub(w)
+		})
+}
+
+func BenchmarkFP32Sub(b *testing.B) {
+	benchmarkCompute(b, buildFP32Scalar, buildFP32Vector, buildFP32Matrix,
+		func(x, w gomath.Tensor) {
+			x.Sub(w)
+		})
+}

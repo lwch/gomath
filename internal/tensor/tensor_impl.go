@@ -12,6 +12,9 @@ type TensorImpl interface {
 	// add
 	FP16Add(x, w, y []uint16)
 	FP16ScalarAdd(x uint16, w, y []uint16)
+	// sub
+	FP16Sub(x, w, y []uint16)
+	FP16ScalarSub(x uint16, w, y []uint16)
 
 	// fp32
 	FP32Dot(x, w []float32) float32
@@ -24,4 +27,7 @@ type TensorImpl interface {
 	// add
 	FP32Add(x, w, y []float32)
 	FP32ScalarAdd(x float32, w, y []float32)
+	// sub
+	FP32Sub(x, w, y []float32)
+	FP32ScalarSub(x float32, w, y []float32)
 }

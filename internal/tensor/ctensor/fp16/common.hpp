@@ -23,6 +23,10 @@ public:
                    int64_t d) = 0;
   virtual void add(const uint16_t *x, const uint16_t *w, uint16_t *y,
                    int64_t d) = 0;
+  virtual void sub(const uint16_t x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
+  virtual void sub(const uint16_t *x, const uint16_t *w, uint16_t *y,
+                   int64_t d) = 0;
 };
 
 // load fp16 into register
@@ -136,6 +140,21 @@ template <> inline __m128i _fp16_add_ps(const __m256 &x, const __m256 &y) {
 
 template <> inline __m256i _fp16_add_ps(const __m512 &x, const __m512 &y) {
   return _mm512_cvtps_ph(_mm512_add_ps(x, y), 0);
+}
+
+// sub
+
+template <typename T, typename T2>
+inline T2 _fp16_sub_ps(const T &x, const T &y) {
+  throw not_implemented_exception("_fp16_sub_ps");
+}
+
+template <> inline __m128i _fp16_sub_ps(const __m256 &x, const __m256 &y) {
+  return _mm256_cvtps_ph(_mm256_sub_ps(x, y), 0);
+}
+
+template <> inline __m256i _fp16_sub_ps(const __m512 &x, const __m512 &y) {
+  return _mm512_cvtps_ph(_mm512_sub_ps(x, y), 0);
 }
 
 // store

@@ -16,6 +16,8 @@ public:
   virtual void div(const float *x, const float *w, float *y, int64_t d) = 0;
   virtual void add(const float x, const float *w, float *y, int64_t d) = 0;
   virtual void add(const float *x, const float *w, float *y, int64_t d) = 0;
+  virtual void sub(const float x, const float *w, float *y, int64_t d) = 0;
+  virtual void sub(const float *x, const float *w, float *y, int64_t d) = 0;
 };
 
 // load fp32 into register
@@ -124,6 +126,20 @@ template <> inline __m256 _fp32_add_ps(const __m256 &x, const __m256 &y) {
 
 template <> inline __m512 _fp32_add_ps(const __m512 &x, const __m512 &y) {
   return _mm512_add_ps(x, y);
+}
+
+// sub
+
+template <typename T> inline T _fp32_sub_ps(const T &x, const T &y) {
+  throw not_implemented_exception("_fp32_sub_ps");
+}
+
+template <> inline __m256 _fp32_sub_ps(const __m256 &x, const __m256 &y) {
+  return _mm256_sub_ps(x, y);
+}
+
+template <> inline __m512 _fp32_sub_ps(const __m512 &x, const __m512 &y) {
+  return _mm512_sub_ps(x, y);
 }
 
 // store

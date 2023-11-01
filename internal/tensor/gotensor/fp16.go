@@ -50,3 +50,16 @@ func (*GoTensor) FP16ScalarAdd(x uint16, w, y []uint16) {
 		y[i] = half.Encode(dx + half.Decode(w[i]))
 	}
 }
+
+func (*GoTensor) FP16Sub(x, w, y []uint16) {
+	for i := range x {
+		y[i] = half.Encode(half.Decode(x[i]) - half.Decode(w[i]))
+	}
+}
+
+func (*GoTensor) FP16ScalarSub(x uint16, w, y []uint16) {
+	dx := half.Decode(x)
+	for i := range w {
+		y[i] = half.Encode(dx - half.Decode(w[i]))
+	}
+}

@@ -84,3 +84,19 @@ func BenchmarkFP16Add(b *testing.B) {
 			x.Add(w)
 		})
 }
+
+func TestFP16Sub(t *testing.T) {
+	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w float32) float32 {
+			return x - w
+		}, func(x, w gomath.Tensor) gomath.Tensor {
+			return x.Sub(w)
+		})
+}
+
+func BenchmarkFP16Sub(b *testing.B) {
+	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, w gomath.Tensor) {
+			x.Sub(w)
+		})
+}
