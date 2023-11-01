@@ -2,14 +2,21 @@ package tensor
 
 import (
 	"github.com/lwch/gomath"
+	"github.com/lwch/gomath/consts"
 )
 
 type Float16Storage []uint16
 
 var _ gomath.Storage = &Float16Storage{}
+var _ rowdI = &Float16Storage{}
+var _ tmpStorage = &Float16Storage{}
 
 func NewFloat16Storage(data []uint16) Float16Storage {
 	return Float16Storage(data)
+}
+
+func (s Float16Storage) Type() consts.Type {
+	return consts.Float16
 }
 
 func (s Float16Storage) Data() any {
@@ -32,4 +39,12 @@ func (s Float16Storage) Range(fn func(int, any)) {
 	for i, v := range s {
 		fn(i, v)
 	}
+}
+
+func (s Float16Storage) rowd(i, d int64) any {
+	return []uint16(s[i*d : (i+1)*d])
+}
+
+func (s Float16Storage) buildTmpStorage(size int64) gomath.Storage {
+	return Float16Storage(make([]uint16, size))
 }

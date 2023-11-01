@@ -10,8 +10,12 @@ import (
 	"github.com/lwch/gomath/internal/tensor/gotensor"
 )
 
-type batchRow interface {
-	row(int64) any
+type rowdI interface {
+	rowd(int64, int64) any
+}
+
+type tmpStorage interface {
+	buildTmpStorage(int64) gomath.Storage
 }
 
 var impl tensor.TensorImpl
@@ -86,12 +90,12 @@ func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Ten
 	core := runtime.NumCPU()
 	parallelX := func(offset1, offset2 int64) {
 		parallel(m, int64(core), func(offset, size int64, args ...any) {
-			for row := offset; row < offset+size; row++ {
-				idx := offset1 + row
-				dTarget := ret.(batchRow).row(idx)
-				dx := x.(batchRow).row(idx % group1)
+			for r := offset; r < offset+size; r++ {
+				idx := offset1 + r
+				dTarget := row(ret, idx)
+				dx := row(x, idx%group1)
 				for col := int64(0); col < n; col++ {
-					dw := w.(batchRow).row((offset2 + col) % group2)
+					dw := row(w, (offset2+col)%group2)
 					dotVector(dTarget, dx, dw, col)
 				}
 			}
@@ -100,11 +104,11 @@ func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Ten
 	parallelW := func(offset1, offset2 int64) {
 		parallel(n, int64(core), func(offset, size int64, args ...any) {
 			for col := offset; col < offset+size; col++ {
-				dw := w.(batchRow).row((offset2 + col) % group2)
-				for row := int64(0); row < m; row++ {
-					idx := offset1 + row
-					dTarget := ret.(batchRow).row(idx)
-					dx := x.(batchRow).row(idx % group1)
+				dw := row(w, (offset2+col)%group2)
+				for r := int64(0); r < m; r++ {
+					idx := offset1 + r
+					dTarget := row(ret, idx)
+					dx := row(x, idx%group1)
 					dotVector(dTarget, dx, dw, col)
 				}
 			}
@@ -170,9 +174,9 @@ func computeVectors(x, w gomath.Tensor,
 	ret := build(append(targetShapes, d1))
 	parallel(targetGroups, int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
 		for block := offset; block < offset+size; block++ {
-			dTarget := ret.(batchRow).row(block)
-			dx := x.(batchRow).row(block % group1)
-			dw := w.(batchRow).row(block % group2)
+			dTarget := row(ret, block)
+			dx := row(x, block%group1)
+			dw := row(w, block%group2)
 			vector2Vector(dTarget, dx, dw)
 		}
 	})

@@ -40,25 +40,24 @@ func (t *Float32) Storage() gomath.Storage {
 	return t.store
 }
 
-func (t *Float32) Transpose() gomath.Tensor {
+func (t *Float32) Transpose(dim0, dim1 int64) gomath.Tensor {
 	panic("implement me")
 }
 
-func (t *Float32) Reshape(shape []int64) gomath.Tensor {
+func (t *Float32) Reshape(shape ...int64) gomath.Tensor {
 	panic("implement me")
 }
 
-func (t *Float32) View(shape []int64) gomath.Tensor {
-	panic("implement me")
+func (t *Float32) View(shape ...int64) gomath.Tensor {
+	return view(t, shape)
 }
 
 func (t *Float32) ToType(tp consts.Type) gomath.Tensor {
 	return convert(t, tp)
 }
 
-func (t *Float32) row(i int64) any {
-	d := t.Size()[t.Dim()-1]
-	return []float32(t.store[i*d : (i+1)*d])
+func (t *Float32) Get(idx ...int64) any {
+	return get(idx, t.Stride(), t.store)
 }
 
 func convertFloat32ToFloat16(t *Float32) gomath.Tensor {

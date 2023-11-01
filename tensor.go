@@ -12,6 +12,7 @@ type Tensor interface {
 	Dim() int64
 	Size() []int64
 	Stride() []int64
+	ElemSize() int64
 	Add(Tensor) Tensor
 	AddScalar(float32) Tensor
 	Sub(Tensor) Tensor
@@ -21,13 +22,15 @@ type Tensor interface {
 	Div(Tensor) Tensor
 	DivScalar(float32) Tensor
 	MatMul(Tensor) Tensor
-	Transpose() Tensor
-	Reshape([]int64) Tensor
-	View([]int64) Tensor
+	Transpose(int64, int64) Tensor
+	Reshape(...int64) Tensor
+	View(...int64) Tensor
+	Get(...int64) any
 	Storage() Storage
 }
 
 type Storage interface {
+	Type() consts.Type
 	Data() any
 	Size() int
 	Get(int64) any
