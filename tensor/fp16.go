@@ -49,11 +49,11 @@ func (t *Float16) Storage() gomath.Storage {
 }
 
 func (t *Float16) Transpose(dim0, dim1 int64) gomath.Tensor {
-	panic("implement me")
+	return transpose(t, dim0, dim1)
 }
 
 func (t *Float16) Reshape(shape ...int64) gomath.Tensor {
-	panic("implement me")
+	return reshape(t, shape)
 }
 
 func (t *Float16) View(shape ...int64) gomath.Tensor {
@@ -66,6 +66,17 @@ func (t *Float16) ToType(tp consts.Type) gomath.Tensor {
 
 func (t *Float16) Get(idx ...int64) any {
 	return get(idx, t.Stride(), t.store)
+}
+
+func (t *Float16) IsContiguous() bool {
+	return isContiguous(t.Size(), t.Stride())
+}
+
+func (t *Float16) Contiguous() gomath.Tensor {
+	if t.IsContiguous() {
+		return t
+	}
+	return contiguous(t)
 }
 
 func convertFloat16ToFloat32(t *Float16) *Float32 {

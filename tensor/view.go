@@ -86,11 +86,11 @@ func (v *View) MatMul(t gomath.Tensor) gomath.Tensor {
 }
 
 func (v *View) Transpose(dim0, dim1 int64) gomath.Tensor {
-	panic("not implemented")
+	return transpose(v, dim0, dim1)
 }
 
 func (v *View) Reshape(shape ...int64) gomath.Tensor {
-	panic("not implemented")
+	return reshape(v, shape)
 }
 
 func (v *View) View(shape ...int64) gomath.Tensor {
@@ -103,6 +103,17 @@ func (v *View) Storage() gomath.Storage {
 
 func (t *View) Get(idx ...int64) any {
 	return get(idx, t.Stride(), t.store)
+}
+
+func (t *View) IsContiguous() bool {
+	return isContiguous(t.Size(), t.Stride())
+}
+
+func (t *View) Contiguous() gomath.Tensor {
+	if t.IsContiguous() {
+		return t
+	}
+	return contiguous(t)
 }
 
 type method2 func(gomath.Tensor, gomath.Tensor) gomath.Tensor

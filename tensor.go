@@ -27,6 +27,8 @@ type Tensor interface {
 	View(...int64) Tensor
 	Get(...int64) any
 	Storage() Storage
+	IsContiguous() bool
+	Contiguous() Tensor
 }
 
 type Storage interface {

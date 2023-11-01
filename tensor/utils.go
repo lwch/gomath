@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/lwch/gomath"
+	"github.com/lwch/gomath/consts"
 	"github.com/lwch/gomath/internal/utils"
 )
 
@@ -74,6 +75,34 @@ func isContiguous(shape, stride []int64) bool {
 	return true
 }
 
+func contiguous(t gomath.Tensor) gomath.Tensor {
+	if isContiguous(t.Size(), t.Stride()) {
+		return t
+	}
+	cnt := t.ElemSize()
+	s := t.Storage().(tmpStorage).buildTmpStorage(cnt)
+	for i := int64(0); i < cnt; i++ {
+		idx := make([]int64, t.Dim())
+		for j := t.Dim() - 1; j >= 0; j-- {
+			idx[j] = i % t.Size()[j]
+			i = (i - t.Size()[j]) / t.Size()[j]
+		}
+		var offset int64
+		for j := 0; j < len(idx); j++ {
+			offset += idx[j] * t.Stride()[j]
+		}
+		s.Set(i, t.Storage().Get(offset))
+	}
+	switch t.Type() {
+	case consts.Float16:
+		return NewFloat16WithStorage(s.(Float16Storage), t.Size(), gomath.WithDevice(t.Device()))
+	case consts.Float32:
+		return NewFloat32WithStorage(s.(Float32Storage), t.Size(), gomath.WithDevice(t.Device()))
+	default:
+		panic(ErrNotSupported)
+	}
+}
+
 func row(t gomath.Tensor, i int64) any {
 	d := t.Size()[t.Dim()-1]
 	if isContiguous(t.Size(), t.Stride()) {
@@ -82,7 +111,7 @@ func row(t gomath.Tensor, i int64) any {
 	idx := make([]int64, t.Dim()-1)
 	for j := t.Dim() - 1; j > 0; j-- {
 		idx[j] = i % t.Size()[j]
-		i /= t.Size()[j]
+		i = (i - t.Size()[j]) / t.Size()[j]
 	}
 	var offset int64
 	for j := 0; j < len(idx); j++ {
@@ -117,4 +146,30 @@ func view(t gomath.Tensor, shape []int64) gomath.Tensor {
 		stride: stride,
 		store:  t.Storage(),
 	}
+}
+
+func transpose(t gomath.Tensor, dim0, dim1 int64) gomath.Tensor {
+	if dim0 >= t.Dim() || dim1 >= t.Dim() {
+		panic("invalid dim")
+	}
+	if dim0 == dim1 {
+		return t
+	}
+	shape := t.Size()
+	stride := t.Stride()
+	shape[dim0], shape[dim1] = shape[dim1], shape[dim0]
+	stride[dim0], stride[dim1] = stride[dim1], stride[dim0]
+	return &View{
+		device: t.Device(),
+		shape:  shape,
+		stride: stride,
+		store:  t.Storage(),
+	}
+}
+
+func reshape(t gomath.Tensor, shape []int64) gomath.Tensor {
+	if t.ElemSize() != sumShapes(shape) {
+		panic("invalid shape")
+	}
+	return view(t, shape).Contiguous()
 }
