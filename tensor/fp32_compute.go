@@ -8,10 +8,10 @@ import (
 )
 
 func (t *Float32) Mul(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return t.Mul(convert(t2, consts.Float32))
-	case consts.Float32:
+	case *Float32:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat32Storage(make([]float32, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat32WithStorage(s, shapes, gomath.WithDevice(t.Device()))
@@ -37,10 +37,10 @@ func (t *Float32) mulVector(ret, dx, dw any) {
 }
 
 func (t *Float32) Div(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return t.Mul(convert(t2, consts.Float32))
-	case consts.Float32:
+	case *Float32:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat32Storage(make([]float32, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat32WithStorage(s, shapes, gomath.WithDevice(t.Device()))
@@ -72,10 +72,10 @@ func (t *Float32) divVector(ret, dx, dw any) {
 }
 
 func (t *Float32) Add(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return t.Add(convert(t2, consts.Float32))
-	case consts.Float32:
+	case *Float32:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat32Storage(make([]float32, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat32WithStorage(s, shapes, gomath.WithDevice(t.Device()))

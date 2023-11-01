@@ -9,13 +9,13 @@ import (
 )
 
 func (t *Float16) Mul(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat16Storage(make([]uint16, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat16WithStorage(s, shapes, gomath.WithDevice(t.Device()))
 		}, t.mulScalar, t.mulScalar, t.mulVector)
-	case consts.Float32:
+	case *Float32:
 		return convert(t, consts.Float32).Mul(t2)
 	default:
 		panic(ErrNotSupported)
@@ -38,13 +38,13 @@ func (t *Float16) mulVector(ret, dx, dw any) {
 }
 
 func (t *Float16) Div(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat16Storage(make([]uint16, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat16WithStorage(s, shapes, gomath.WithDevice(t.Device()))
 		}, t.scalarDivVector, t.vectorDivScalar, t.divVector)
-	case consts.Float32:
+	case *Float32:
 		return convert(t, consts.Float32).Mul(t2)
 	default:
 		panic(ErrNotSupported)
@@ -73,13 +73,13 @@ func (t *Float16) divVector(ret, dx, dw any) {
 }
 
 func (t *Float16) Add(t2 gomath.Tensor) gomath.Tensor {
-	switch t2.Type() {
-	case consts.Float16:
+	switch t2.(type) {
+	case *Float16:
 		return computeVectors(t, t2, func(shapes []int64) gomath.Tensor {
 			s := NewFloat16Storage(make([]uint16, sumShapes(shapes)), shapes[len(shapes)-1])
 			return NewFloat16WithStorage(s, shapes, gomath.WithDevice(t.Device()))
 		}, t.addScalar, t.addScalar, t.addVector)
-	case consts.Float32:
+	case *Float32:
 		return convert(t, consts.Float32).Add(t2)
 	default:
 		panic(ErrNotSupported)
