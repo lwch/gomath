@@ -8,6 +8,7 @@ func (t *Float32) Pow(n float32) gomath.Tensor {
 
 func powFP32(n any, t gomath.Tensor) gomath.Tensor {
 	return compute11(t, buildFP32, func(ret, x any) {
-		impl.FP32Pow(x.([]float32), n.(float32), ret.([]float32))
+		// C method is too slow
+		goImpl.FP32Pow(x.([]float32), n.(float32), ret.([]float32))
 	})
 }

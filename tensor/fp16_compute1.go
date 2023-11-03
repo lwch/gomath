@@ -11,6 +11,7 @@ func (t *Float16) Pow(n float32) gomath.Tensor {
 
 func powFP16(n any, t gomath.Tensor) gomath.Tensor {
 	return compute11(t, buildFP16, func(ret, x any) {
-		impl.FP16Pow(x.([]uint16), half.Encode(n.(float32)), ret.([]uint16))
+		// C method is too slow
+		goImpl.FP16Pow(x.([]uint16), half.Encode(n.(float32)), ret.([]uint16))
 	})
 }
