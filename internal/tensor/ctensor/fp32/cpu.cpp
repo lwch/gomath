@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "fp32.h"
 #include <exception>
+#include <math.h>
 #include <stdio.h>
 
 #if !(defined(__APPLE__) && defined(__arm64__))
@@ -38,6 +39,13 @@
     }                                                                          \
     for (size_t i = 0; i < d - np; i++) {                                      \
       y[i] = x op w[i];                                                        \
+    }                                                                          \
+  } while (0)
+
+#define MATH1(fn)                                                              \
+  do {                                                                         \
+    for (size_t i = 0; i < d; i++) {                                           \
+      y[i] = fn(x[i], n);                                                      \
     }                                                                          \
   } while (0)
 
@@ -92,6 +100,10 @@ public:
   virtual void sub(const float *x, const float *w, float *y, int64_t d) {
     COMPUTE_VECTOR(_fp32_sub_ps, -);
   }
+
+  virtual void pow(const float *x, const float n, float *y, int64_t d) {
+    MATH1(powf);
+  }
 };
 
 static fp32 *_fp32;
@@ -141,6 +153,10 @@ void fp32_scalar_sub(const float x, const float *w, float *y, int64_t d) {
 
 void fp32_sub(const float *x, const float *w, float *y, int64_t d) {
   _fp32->sub(x, w, y, d);
+}
+
+void fp32_pow(const float *x, const float n, float *y, int64_t d) {
+  _fp32->pow(x, n, y, d);
 }
 
 #endif

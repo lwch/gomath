@@ -35,10 +35,14 @@ func (s Float16Storage) Set(i int64, value any) {
 	s[i] = value.(uint16)
 }
 
-func (s Float16Storage) Range(fn func(int, any)) {
+func (s Float16Storage) Loop(fn func(int, any)) {
 	for i, v := range s {
 		fn(i, v)
 	}
+}
+
+func (s Float16Storage) Range(i, j int64) any {
+	return []uint16(s[i:j])
 }
 
 func (s Float16Storage) rowd(i, d int64) any {

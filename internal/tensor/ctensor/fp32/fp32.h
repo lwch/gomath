@@ -29,6 +29,9 @@ void fp32_add(const float *x, const float *w, float *y, int64_t d);
 void fp32_scalar_sub(const float x, const float *w, float *y, int64_t d);
 void fp32_sub(const float *x, const float *w, float *y, int64_t d);
 
+// pow
+void fp32_pow(const float *x, const float n, float *y, int64_t d);
+
 #ifdef __cplusplus
 }
 #endif

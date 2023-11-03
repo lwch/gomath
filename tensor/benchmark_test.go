@@ -8,7 +8,27 @@ import (
 	"gonum.org/v1/gonum/blas/blas32"
 )
 
-func benchmarkC(b *testing.B, name string, x, w gomath.Tensor, fn func(x, w gomath.Tensor)) {
+func benchmarkC11(b *testing.B, name string, x gomath.Tensor, n float32, fn func(x gomath.Tensor, n float32)) {
+	useCTensor(func() {
+		b.Run(name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fn(x, n)
+			}
+		})
+	})
+}
+
+func benchmarkGo11(b *testing.B, name string, x gomath.Tensor, n float32, fn func(x gomath.Tensor, n float32)) {
+	useGoTensor(func() {
+		b.Run(name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				fn(x, n)
+			}
+		})
+	})
+}
+
+func benchmarkC2(b *testing.B, name string, x, w gomath.Tensor, fn func(x, w gomath.Tensor)) {
 	useCTensor(func() {
 		b.Run(name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
@@ -18,7 +38,7 @@ func benchmarkC(b *testing.B, name string, x, w gomath.Tensor, fn func(x, w goma
 	})
 }
 
-func benchmarkGo(b *testing.B, name string, x, w gomath.Tensor, fn func(x, w gomath.Tensor)) {
+func benchmarkGo2(b *testing.B, name string, x, w gomath.Tensor, fn func(x, w gomath.Tensor)) {
 	useGoTensor(func() {
 		b.Run(name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
@@ -63,8 +83,8 @@ func benchmarkMatMul(b *testing.B, goNum bool,
 	}
 
 	benchmark := func(name string, x, w gomath.Tensor) {
-		benchmarkC(b, name+"/C", x, w, compute)
-		benchmarkGo(b, name+"/Go", x, w, compute)
+		benchmarkC2(b, name+"/C", x, w, compute)
+		benchmarkGo2(b, name+"/Go", x, w, compute)
 	}
 
 	benchmark("Vector2Vector", vector, vector)
@@ -112,7 +132,7 @@ func benchmarkMatMul(b *testing.B, goNum bool,
 	}
 }
 
-func benchmarkCompute(b *testing.B,
+func benchmarkCompute2(b *testing.B,
 	buildScalar func(float32) gomath.Tensor,
 	buildVector func(int64) gomath.Tensor,
 	buildMatrix func(int64, int64) gomath.Tensor,
@@ -123,8 +143,8 @@ func benchmarkCompute(b *testing.B,
 	matrix := buildFP16Matrix(benchmarkRows, benchmarkCols)
 
 	benchmark := func(name string, x, w gomath.Tensor) {
-		benchmarkC(b, name+"/C", x, w, compute)
-		benchmarkGo(b, name+"/Go", x, w, compute)
+		benchmarkC2(b, name+"/C", x, w, compute)
+		benchmarkGo2(b, name+"/Go", x, w, compute)
 	}
 
 	benchmark("Scalar2Scalar", scalar, scalar)
@@ -136,4 +156,24 @@ func benchmarkCompute(b *testing.B,
 	benchmark("Matrix2Scalar", matrix, scalar)
 	benchmark("Matrix2Vector", matrix, vector)
 	benchmark("Matrix2Matrix", matrix, matrix)
+}
+
+func benchmarkCompute11(b *testing.B, n float32,
+	buildScalar func(float32) gomath.Tensor,
+	buildVector func(int64) gomath.Tensor,
+	buildMatrix func(int64, int64) gomath.Tensor,
+	compute func(gomath.Tensor, float32)) {
+
+	scalar := buildFP16Scalar(getScalar())
+	vector := buildFP16Vector(benchmarkCols)
+	matrix := buildFP16Matrix(benchmarkRows, benchmarkCols)
+
+	benchmark := func(name string, x gomath.Tensor) {
+		benchmarkC11(b, name+"/C", x, n, compute)
+		benchmarkGo11(b, name+"/Go", x, n, compute)
+	}
+
+	benchmark("Scalar", scalar)
+	benchmark("Vector", vector)
+	benchmark("Matrix", matrix)
 }

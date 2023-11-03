@@ -18,6 +18,7 @@ public:
   virtual void add(const float *x, const float *w, float *y, int64_t d) = 0;
   virtual void sub(const float x, const float *w, float *y, int64_t d) = 0;
   virtual void sub(const float *x, const float *w, float *y, int64_t d) = 0;
+  virtual void pow(const float *x, const float n, float *y, int64_t d) = 0;
 };
 
 // load fp32 into register

@@ -24,12 +24,10 @@ func (t *Float16) MulScalar(n float32) gomath.Tensor {
 }
 
 func mulFP16(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat16Storage(make([]uint16, sumShapes(shapes)))
-		return NewFloat16WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarMulFP16, scalarMulFP16, func(ret, x, w any) {
-		impl.FP16Mul(x.([]uint16), w.([]uint16), ret.([]uint16))
-	})
+	return compute2(x, w, buildFP16,
+		scalarMulFP16, scalarMulFP16, func(ret, x, w any) {
+			impl.FP16Mul(x.([]uint16), w.([]uint16), ret.([]uint16))
+		})
 }
 
 func scalarMulFP16(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -59,12 +57,10 @@ func (t *Float16) DivScalar(n float32) gomath.Tensor {
 }
 
 func divFP16(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat16Storage(make([]uint16, sumShapes(shapes)))
-		return NewFloat16WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarDivFP16, vectorDivFP16, func(ret, x, w any) {
-		impl.FP16Div(x.([]uint16), w.([]uint16), ret.([]uint16))
-	})
+	return compute2(x, w, buildFP16,
+		scalarDivFP16, vectorDivFP16, func(ret, x, w any) {
+			impl.FP16Div(x.([]uint16), w.([]uint16), ret.([]uint16))
+		})
 }
 
 func scalarDivFP16(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -100,12 +96,10 @@ func (t *Float16) AddScalar(n float32) gomath.Tensor {
 }
 
 func addFP16(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat16Storage(make([]uint16, sumShapes(shapes)))
-		return NewFloat16WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarAddFP16, scalarAddFP16, func(ret, x, w any) {
-		impl.FP16Add(x.([]uint16), w.([]uint16), ret.([]uint16))
-	})
+	return compute2(x, w, buildFP16,
+		scalarAddFP16, scalarAddFP16, func(ret, x, w any) {
+			impl.FP16Add(x.([]uint16), w.([]uint16), ret.([]uint16))
+		})
 }
 
 func scalarAddFP16(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -135,12 +129,10 @@ func (t *Float16) SubScalar(n float32) gomath.Tensor {
 }
 
 func subFP16(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat16Storage(make([]uint16, sumShapes(shapes)))
-		return NewFloat16WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarSubFP16, subScalarFP16, func(ret, x, w any) {
-		impl.FP16Sub(x.([]uint16), w.([]uint16), ret.([]uint16))
-	})
+	return compute2(x, w, buildFP16,
+		scalarSubFP16, subScalarFP16, func(ret, x, w any) {
+			impl.FP16Sub(x.([]uint16), w.([]uint16), ret.([]uint16))
+		})
 }
 
 func scalarSubFP16(scalar any, t2 gomath.Tensor) gomath.Tensor {

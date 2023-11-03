@@ -33,6 +33,9 @@ void fp16_scalar_sub(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d);
 void fp16_sub(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d);
 
+// pow
+void fp16_pow(const uint16_t *x, const uint16_t n, uint16_t *y, int64_t d);
+
 #ifdef __cplusplus
 }
 #endif

@@ -5,6 +5,7 @@
 #include "common.hpp"
 #include "fp16.h"
 #include <exception>
+#include <math.h>
 #include <stdio.h>
 
 #if !(defined(__APPLE__) && defined(__arm64__))
@@ -39,6 +40,15 @@
     }                                                                          \
     for (size_t i = 0; i < d - np; i++) {                                      \
       y[i] = fp32_to_fp16(fp16_to_fp32(x) op fp16_to_fp32(w[i]));              \
+    }                                                                          \
+  } while (0)
+
+#define MATH1(fn)                                                              \
+  do {                                                                         \
+    float dn = fp16_to_fp32(n);                                                \
+    for (size_t i = 0; i < d; i++) {                                           \
+      float v = fn(fp16_to_fp32(x[i]), dn);                                    \
+      y[i] = fp32_to_fp16(v);                                                  \
     }                                                                          \
   } while (0)
 
@@ -101,6 +111,11 @@ public:
                    int64_t d) {
     COMPUTE_VECTOR(_fp16_sub_ps, -);
   }
+
+  virtual void pow(const uint16_t *x, const uint16_t n, uint16_t *y,
+                   int64_t d) {
+    MATH1(powf);
+  }
 };
 
 static fp16 *_fp16;
@@ -154,6 +169,10 @@ void fp16_scalar_sub(const uint16_t x, const uint16_t *w, uint16_t *y,
 
 void fp16_sub(const uint16_t *x, const uint16_t *w, uint16_t *y, int64_t d) {
   _fp16->sub(x, w, y, d);
+}
+
+void fp16_pow(const uint16_t *x, const uint16_t n, uint16_t *y, int64_t d) {
+  _fp16->pow(x, n, y, d);
 }
 
 #endif

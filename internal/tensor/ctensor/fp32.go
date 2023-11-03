@@ -82,3 +82,12 @@ func (*CTensor) FP32ScalarSub(x float32, w, y []float32) {
 		C.int64_t(len(w)),
 	)
 }
+
+func (*CTensor) FP32Pow(x []float32, n float32, y []float32) {
+	C.fp32_pow(
+		(*C.float)(&x[0]),
+		C.float(n),
+		(*C.float)(&y[0]),
+		C.int64_t(len(x)),
+	)
+}

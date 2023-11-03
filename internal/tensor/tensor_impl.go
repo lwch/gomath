@@ -15,6 +15,8 @@ type TensorImpl interface {
 	// sub
 	FP16Sub(x, w, y []uint16)
 	FP16ScalarSub(x uint16, w, y []uint16)
+	// pow
+	FP16Pow(x []uint16, n uint16, y []uint16)
 
 	// fp32
 	FP32Dot(x, w []float32) float32
@@ -30,4 +32,6 @@ type TensorImpl interface {
 	// sub
 	FP32Sub(x, w, y []float32)
 	FP32ScalarSub(x float32, w, y []float32)
+	// pow
+	FP32Pow(x []float32, n float32, y []float32)
 }

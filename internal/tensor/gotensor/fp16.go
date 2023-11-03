@@ -1,6 +1,9 @@
 package gotensor
 
-import "github.com/lwch/gomath/internal/half"
+import (
+	"github.com/chewxy/math32"
+	"github.com/lwch/gomath/internal/half"
+)
 
 func (*GoTensor) FP16Dot(x, w []uint16) uint16 {
 	dx := make([]float32, len(x))
@@ -61,5 +64,12 @@ func (*GoTensor) FP16ScalarSub(x uint16, w, y []uint16) {
 	dx := half.Decode(x)
 	for i := range w {
 		y[i] = half.Encode(dx - half.Decode(w[i]))
+	}
+}
+
+func (*GoTensor) FP16Pow(x []uint16, n uint16, y []uint16) {
+	dn := half.Decode(n)
+	for i := range x {
+		y[i] = half.Encode(math32.Pow(half.Decode(x[i]), dn))
 	}
 }

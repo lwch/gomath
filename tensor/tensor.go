@@ -34,6 +34,7 @@ type fnBuild func(shapes []int64) gomath.Tensor
 type fnScalarAndVector func(scalar any, t gomath.Tensor) gomath.Tensor
 type fnVectorAndVector func(ret, x, w any)
 type fnDotVector func(ret, x, w any, col int64)
+type fnVectorCompute func(ret, x any)
 
 func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Tensor {
 	size1, d1 := splitShapes(x)
@@ -132,7 +133,17 @@ func matMul(x, w gomath.Tensor, build fnBuild, dotVector fnDotVector) gomath.Ten
 	return ret
 }
 
-func computeVectors(x, w gomath.Tensor,
+func compute11(x gomath.Tensor, build fnBuild, fn fnVectorCompute) gomath.Tensor {
+	ret := build(x.Size())
+	parallel(x.ElemSize(), int64(runtime.NumCPU()), func(offset, size int64, _ ...any) {
+		dTarget := ret.Storage().Range(offset, offset+size)
+		dx := x.Storage().Range(offset, offset+size)
+		fn(dTarget, dx)
+	})
+	return ret
+}
+
+func compute2(x, w gomath.Tensor,
 	build fnBuild,
 	scalar2Vector, vector2Scalar fnScalarAndVector,
 	vector2Vector fnVectorAndVector) gomath.Tensor {

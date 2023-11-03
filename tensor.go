@@ -22,6 +22,7 @@ type Tensor interface {
 	Div(Tensor) Tensor
 	DivScalar(float32) Tensor
 	MatMul(Tensor) Tensor
+	Pow(float32) Tensor
 	Transpose(int64, int64) Tensor
 	Reshape(...int64) Tensor
 	View(...int64) Tensor
@@ -37,5 +38,6 @@ type Storage interface {
 	Size() int
 	Get(int64) any
 	Set(int64, any)
-	Range(func(int, any))
+	Range(int64, int64) any
+	Loop(func(int, any))
 }

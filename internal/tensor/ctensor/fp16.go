@@ -82,3 +82,12 @@ func (*CTensor) FP16ScalarSub(x uint16, w, y []uint16) {
 		C.int64_t(len(w)),
 	)
 }
+
+func (*CTensor) FP16Pow(x []uint16, n uint16, y []uint16) {
+	C.fp16_pow(
+		(*C.uint16_t)(&x[0]),
+		C.uint16_t(n),
+		(*C.uint16_t)(&y[0]),
+		C.int64_t(len(x)),
+	)
+}

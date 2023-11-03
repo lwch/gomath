@@ -40,7 +40,7 @@ func equal(data gomath.Storage, expect []float32) bool {
 	}
 	ok := true
 	var std float32
-	data.Range(func(i int, a any) {
+	data.Loop(func(i int, a any) {
 		v, ok := a.(float32)
 		if !ok {
 			v = half.Decode(a.(uint16))

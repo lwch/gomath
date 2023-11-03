@@ -23,12 +23,10 @@ func (t *Float32) MulScalar(n float32) gomath.Tensor {
 }
 
 func mulFP32(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat32Storage(make([]float32, sumShapes(shapes)))
-		return NewFloat32WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarMulFP32, scalarMulFP32, func(ret, x, w any) {
-		impl.FP32Mul(x.([]float32), w.([]float32), ret.([]float32))
-	})
+	return compute2(x, w, buildFP32,
+		scalarMulFP32, scalarMulFP32, func(ret, x, w any) {
+			impl.FP32Mul(x.([]float32), w.([]float32), ret.([]float32))
+		})
 }
 
 func scalarMulFP32(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -58,12 +56,10 @@ func (t *Float32) DivScalar(n float32) gomath.Tensor {
 }
 
 func divFP32(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat32Storage(make([]float32, sumShapes(shapes)))
-		return NewFloat32WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarDivFP32, vectorDivFP32, func(ret, x, w any) {
-		impl.FP32Div(x.([]float32), w.([]float32), ret.([]float32))
-	})
+	return compute2(x, w, buildFP32,
+		scalarDivFP32, vectorDivFP32, func(ret, x, w any) {
+			impl.FP32Div(x.([]float32), w.([]float32), ret.([]float32))
+		})
 }
 
 func scalarDivFP32(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -99,12 +95,10 @@ func (t *Float32) AddScalar(n float32) gomath.Tensor {
 }
 
 func addFP32(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat32Storage(make([]float32, sumShapes(shapes)))
-		return NewFloat32WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarAddFP32, scalarAddFP32, func(ret, x, w any) {
-		impl.FP32Add(x.([]float32), w.([]float32), ret.([]float32))
-	})
+	return compute2(x, w, buildFP32,
+		scalarAddFP32, scalarAddFP32, func(ret, x, w any) {
+			impl.FP32Add(x.([]float32), w.([]float32), ret.([]float32))
+		})
 }
 
 func scalarAddFP32(scalar any, t2 gomath.Tensor) gomath.Tensor {
@@ -134,12 +128,10 @@ func (t *Float32) SubScalar(n float32) gomath.Tensor {
 }
 
 func subFP32(x, w gomath.Tensor) gomath.Tensor {
-	return computeVectors(x, w, func(shapes []int64) gomath.Tensor {
-		s := NewFloat32Storage(make([]float32, sumShapes(shapes)))
-		return NewFloat32WithStorage(s, shapes, gomath.WithDevice(x.Device()))
-	}, scalarSubFP32, subScalarFP32, func(ret, x, w any) {
-		impl.FP32Sub(x.([]float32), w.([]float32), ret.([]float32))
-	})
+	return compute2(x, w, buildFP32,
+		scalarSubFP32, subScalarFP32, func(ret, x, w any) {
+			impl.FP32Sub(x.([]float32), w.([]float32), ret.([]float32))
+		})
 }
 
 func scalarSubFP32(scalar any, t2 gomath.Tensor) gomath.Tensor {

@@ -54,7 +54,7 @@ func (v *View) Add(t gomath.Tensor) gomath.Tensor {
 }
 
 func (v *View) AddScalar(s float32) gomath.Tensor {
-	return v.doScalar(s, scalarAddFP16, scalarAddFP32)
+	return v.do1(s, scalarAddFP16, scalarAddFP32)
 }
 
 func (v *View) Sub(t gomath.Tensor) gomath.Tensor {
@@ -62,7 +62,7 @@ func (v *View) Sub(t gomath.Tensor) gomath.Tensor {
 }
 
 func (v *View) SubScalar(s float32) gomath.Tensor {
-	return v.doScalar(-s, scalarAddFP16, scalarAddFP16)
+	return v.do1(-s, scalarAddFP16, scalarAddFP16)
 }
 
 func (v *View) Mul(t gomath.Tensor) gomath.Tensor {
@@ -70,7 +70,7 @@ func (v *View) Mul(t gomath.Tensor) gomath.Tensor {
 }
 
 func (v *View) MulScalar(s float32) gomath.Tensor {
-	return v.doScalar(s, scalarMulFP16, scalarMulFP32)
+	return v.do1(s, scalarMulFP16, scalarMulFP32)
 }
 
 func (v *View) Div(t gomath.Tensor) gomath.Tensor {
@@ -78,11 +78,15 @@ func (v *View) Div(t gomath.Tensor) gomath.Tensor {
 }
 
 func (v *View) DivScalar(s float32) gomath.Tensor {
-	return v.doScalar(1/s, scalarMulFP16, scalarMulFP32)
+	return v.do1(1/s, scalarMulFP16, scalarMulFP32)
 }
 
 func (v *View) MatMul(t gomath.Tensor) gomath.Tensor {
 	return v.do2(t, matMulFP16, matMulFP32)
+}
+
+func (v *View) Pow(n float32) gomath.Tensor {
+	return v.do1(n, powFP16, powFP32)
 }
 
 func (v *View) Transpose(dim0, dim1 int64) gomath.Tensor {
@@ -137,9 +141,9 @@ func (v *View) do2(t gomath.Tensor, fnFP16, fnFP32 method2) gomath.Tensor {
 	}
 }
 
-type methodScalar func(any, gomath.Tensor) gomath.Tensor
+type method1 func(any, gomath.Tensor) gomath.Tensor
 
-func (v *View) doScalar(n float32, fnFP16, fnFP32 methodScalar) gomath.Tensor {
+func (v *View) do1(n float32, fnFP16, fnFP32 method1) gomath.Tensor {
 	switch v.Type() {
 	case consts.Float16:
 		return fnFP16(half.Encode(n), v)

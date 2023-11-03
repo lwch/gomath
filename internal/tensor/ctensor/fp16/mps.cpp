@@ -16,5 +16,6 @@ void fp16_add(const uint16_t *, const uint16_t *, uint16_t *, int64_t) {}
 void fp16_scalar_sub(const uint16_t x, const uint16_t *w, uint16_t *y,
                      int64_t d) {}
 void fp16_sub(const uint16_t *, const uint16_t *, uint16_t *, int64_t) {}
+void fp16_pow(const uint16_t *, const uint16_t, uint16_t *, int64_t) {}
 
 #endif

@@ -27,6 +27,8 @@ public:
                    int64_t d) = 0;
   virtual void sub(const uint16_t *x, const uint16_t *w, uint16_t *y,
                    int64_t d) = 0;
+  virtual void pow(const uint16_t *x, const uint16_t n, uint16_t *y,
+                   int64_t d) = 0;
 };
 
 // load fp16 into register

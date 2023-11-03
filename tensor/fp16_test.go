@@ -3,6 +3,7 @@ package tensor
 import (
 	"testing"
 
+	"github.com/chewxy/math32"
 	"github.com/lwch/gomath"
 )
 
@@ -38,7 +39,7 @@ func BenchmarkFP16MatMul(b *testing.B) {
 }
 
 func TestFP16Mul(t *testing.T) {
-	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	testCompute2(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w float32) float32 {
 			return x * w
 		}, func(x, w gomath.Tensor) gomath.Tensor {
@@ -47,14 +48,14 @@ func TestFP16Mul(t *testing.T) {
 }
 
 func BenchmarkFP16Mul(b *testing.B) {
-	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute2(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Mul(w)
 		})
 }
 
 func TestFP16Div(t *testing.T) {
-	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	testCompute2(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w float32) float32 {
 			return x / w
 		}, func(x, w gomath.Tensor) gomath.Tensor {
@@ -63,14 +64,14 @@ func TestFP16Div(t *testing.T) {
 }
 
 func BenchmarkFP16Div(b *testing.B) {
-	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute2(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Div(w)
 		})
 }
 
 func TestFP16Add(t *testing.T) {
-	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	testCompute2(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w float32) float32 {
 			return x + w
 		}, func(x, w gomath.Tensor) gomath.Tensor {
@@ -79,14 +80,14 @@ func TestFP16Add(t *testing.T) {
 }
 
 func BenchmarkFP16Add(b *testing.B) {
-	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute2(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Add(w)
 		})
 }
 
 func TestFP16Sub(t *testing.T) {
-	testCompute(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	testCompute2(t, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w float32) float32 {
 			return x - w
 		}, func(x, w gomath.Tensor) gomath.Tensor {
@@ -95,8 +96,24 @@ func TestFP16Sub(t *testing.T) {
 }
 
 func BenchmarkFP16Sub(b *testing.B) {
-	benchmarkCompute(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+	benchmarkCompute2(b, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
 		func(x, w gomath.Tensor) {
 			x.Sub(w)
+		})
+}
+
+func TestFP16Pow(t *testing.T) {
+	testCompute11(t, 2, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x, n float32) float32 {
+			return math32.Pow(x, n)
+		}, func(x gomath.Tensor, n float32) gomath.Tensor {
+			return x.Pow(n)
+		})
+}
+
+func BenchmarkFP16Pow(b *testing.B) {
+	benchmarkCompute11(b, 2, buildFP16Scalar, buildFP16Vector, buildFP16Matrix,
+		func(x gomath.Tensor, n float32) {
+			x.Pow(n)
 		})
 }

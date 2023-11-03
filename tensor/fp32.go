@@ -73,9 +73,14 @@ func (t *Float32) Contiguous() gomath.Tensor {
 
 func convertFloat32ToFloat16(t *Float32) gomath.Tensor {
 	data := make([]uint16, t.store.Size())
-	t.store.Range(func(i int, a any) {
+	t.store.Loop(func(i int, a any) {
 		data[i] = half.Encode(a.(float32))
 	})
 	return NewFloat16Raw(data, t.Size(),
 		gomath.WithDevice(t.Device()))
+}
+
+func buildFP32(shapes []int64) gomath.Tensor {
+	s := NewFloat32Storage(make([]float32, sumShapes(shapes)))
+	return NewFloat32WithStorage(s, shapes)
 }
